@@ -142,7 +142,6 @@ ACDS_VERSION := 15.1
 ELF := ece423.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS += hello_world.c
 C_SRCS += libs/ece423_sd/FatFileSystem.c
 C_SRCS += libs/ece423_sd/FatInternal.c
 C_SRCS += libs/ece423_sd/debug.c
@@ -151,6 +150,7 @@ C_SRCS += libs/ece423_sd/ocsdc.c
 C_SRCS += libs/ece423_sd/sd_lib.c
 C_SRCS += libs/ece423_vid_ctl/ece423_vid_ctl.c
 C_SRCS += libs/ece423_vid_ctl/i2c.c
+C_SRCS += main.c
 CXX_SRCS :=
 ASM_SRCS :=
 

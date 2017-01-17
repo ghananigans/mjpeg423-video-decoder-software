@@ -17,14 +17,14 @@
 #include <stdio.h>
 #include "libs/ece423_sd/ece423_sd.h"
 
-void print_result(bool result, char* system_initing){
+void print_result(bool result, char* string){
 	if (result)
 	  {
-		printf("%s successful :D\n");
+		printf("%s successful :D\n", string);
 	  }
 	  else
 	  {
-		printf("%s failed D:\n");
+		printf("%s failed D:\n", string);
 		while(1){}
 	  }
 }
@@ -44,12 +44,24 @@ int main()
 
   print_result(Fat_FileBrowseBegin(hFAT, &FatBrowseHandle), "Fat_FileBrowseBegin");
 
-  print_result(Fat_FileBrowseNext(&FatBrowseHandle, &fileContext), "Fat_FileBrowseNext");
-  printf("File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext), fileContext.FileSize);
+  bool fileFound = 0;
 
-  print_result(Fat_FileBrowseNext(&FatBrowseHandle, &fileContext), "Fat_FileBrowseNext");
-  printf("File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext), fileContext.FileSize);
+  while(Fat_FileBrowseNext(&FatBrowseHandle, &fileContext))
+  {
+	  if(Fat_CheckExtension(&fileContext, ".MPG"))
+	  {
+		  fileFound = 1;
+		  break;
+	  }
+  }
 
+  if(!fileFound)
+  {
+	  printf("No MPEG file found\n");
+	  while(1){}
+  }
+
+  printf("File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext), fileContext.FileSize);
 
   return 0;
 }

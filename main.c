@@ -72,7 +72,7 @@ int main()
   FAT_FILE_HANDLE hFile = Fat_FileOpen(hFAT, Fat_GetFileName(&fileContext));
   if (!hFile) {
 	  printf("Error in opening file!\n");
-	  return NULL;
+	  while(1){}
   }
 
   // read the file header
@@ -84,18 +84,34 @@ int main()
   if(!display)
   {
 	  printf("Failed to init video display\n");
-	  return 0;
+	  while(1){}
   }
   printf("Video DMA initialized!\n");
 
-
-
   // set up frame buffers
   MPEG_WORKING_BUFFER mpegFrameBuffer;
-  allocate_frame_buffer(&mpegHeader, &mpegFrameBuffer);
+  if (!allocate_frame_buffer(&mpegHeader, &mpegFrameBuffer))
+  {
+	  printf("Failed to allocate working buffers\n");
+	  while(1){}
+  }
 
-  read_next_frame(hFile, &mpegHeader, &mpegFrameBuffer, display->buffer_ptrs[0]->buffer);
+  if (!read_next_frame(hFile, &mpegHeader, &mpegFrameBuffer, display->buffer_ptrs[1]->buffer))
+  {
+	  printf("Failed to read next frame\n");
+	  while(1){}
+  }
+
   printf("Generated first buffer\n");
+
+  // Wait until buffer is available
+  while(!ece423_video_display_buffer_is_available(display)) {}
+
+  ece423_video_display_register_written_buffer(display);
+
+  printf("Switching frames\n");
+  ece423_video_display_switch_frames(display);
+  printf("Done Switching frames\n");
 
   deallocate_frame_buffer(&mpegFrameBuffer);
   return 0;

@@ -88,7 +88,7 @@ int read_next_frame(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_WO
     int wYb_size = mpegHeader->w_size/8;
 
 	//read frame payload
-	if(!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) ERROR_AND_EXIT("cannot read input file");
+	if(!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) ERROR_AND_EXIT("cannot read input file2");
 	frame_size  = frame_header[0];
 	frame_type  = frame_header[1];
 	Ysize       = frame_header[2];
@@ -97,8 +97,12 @@ int read_next_frame(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_WO
 	printf("Frame_size %u\n",frame_size);
 	printf("Frame_type %u\n",frame_type);
 
-	if(!Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t)) != (frame_size - 4 * sizeof(uint32_t)))
-		ERROR_AND_EXIT("cannot read input file");
+	int num = Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t));
+
+	printf("Number of bytes Read: %d; Expected: %d\n", num, frame_size - 4 * sizeof(uint32_t));
+
+	if(num != (frame_size - 4 * sizeof(uint32_t)))
+		ERROR_AND_EXIT("cannot read input file3");
 
 	//set the Cb and Cr bitstreams to point to the right location
 	mpegFrameBuffer->Cbbitstream = mpegFrameBuffer->Ybitstream + Ysize;

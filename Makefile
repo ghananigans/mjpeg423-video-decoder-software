@@ -151,6 +151,23 @@ C_SRCS += libs/ece423_sd/sd_lib.c
 C_SRCS += libs/ece423_vid_ctl/ece423_vid_ctl.c
 C_SRCS += libs/ece423_vid_ctl/i2c.c
 C_SRCS += main.c
+C_SRCS += libs/mjpeg423/common/tables.c
+C_SRCS += libs/mjpeg423/common/util.c
+C_SRCS += libs/mjpeg423/decoder/idct.c
+C_SRCS += libs/mjpeg423/decoder/lossless_decode.c
+C_SRCS += libs/mjpeg423/decoder/mjpeg423_decoder.c
+C_SRCS += libs/mjpeg423/decoder/ycbcr_to_rgb.c
+C_SRCS += libs/mjpeg423/encoder/fdct.c
+C_SRCS += libs/mjpeg423/encoder/lossless_encode.c
+C_SRCS += libs/mjpeg423/encoder/mjpeg423_encoder.c
+C_SRCS += libs/mjpeg423/encoder/quantize.c
+C_SRCS += libs/mjpeg423/encoder/rgb_to_ycbcr.c
+C_SRCS += libs/mjpeg423/libbmp/bmpfile.c
+C_SRCS += libs/mjpeg423/libbmp/encode_bmp.c
+C_SRCS += libs/mjpeg423/libnsbmp/decode_bmp.c
+C_SRCS += libs/mjpeg423/libnsbmp/libnsbmp.c
+C_SRCS += libs/mjpeg423/sample_main.c
+C_SRCS += lib_exts/mpeg423/mpeg423_decoder_ext.c
 CXX_SRCS :=
 ASM_SRCS :=
 
@@ -173,7 +190,7 @@ APP_CFLAGS_UNDEFINED_SYMBOLS :=
 APP_CFLAGS_OPTIMIZATION := -O0
 APP_CFLAGS_DEBUG_LEVEL := -g
 APP_CFLAGS_WARNINGS := -Wall
-APP_CFLAGS_USER_FLAGS :=
+APP_CFLAGS_USER_FLAGS := -std=c99
 
 APP_ASFLAGS_USER :=
 APP_LDFLAGS_USER :=

@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include "libs/ece423_sd/ece423_sd.h"
+#include "lib_exts/mpeg423/mpeg423_decoder_ext.h"
 
 void print_result(bool result, char* string){
 	if (result)
@@ -62,6 +63,17 @@ int main()
   }
 
   printf("File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext), fileContext.FileSize);
+
+  // opening the file
+  FAT_FILE_HANDLE hFile = Fat_FileOpen(hFAT, Fat_GetFileName(&fileContext));
+  if (!hFile) {
+	  printf("Error in opening file!\n");
+	  return NULL;
+  }
+
+  // read the file header
+  MPEG_FILE_HEADER mpegHeader;
+  read_mpeg_header(hFile, &mpegHeader);
 
   return 0;
 }

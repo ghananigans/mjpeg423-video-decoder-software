@@ -15,8 +15,10 @@
  */
 
 #include <stdio.h>
+#include <system.h>
 #include "libs/ece423_sd/ece423_sd.h"
 #include "lib_exts/mpeg423/mpeg423_decoder_ext.h"
+#include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
 
 void print_result(bool result, char* string){
 	if (result)
@@ -33,6 +35,8 @@ void print_result(bool result, char* string){
 int main()
 {
   printf("Application Starting...\n");
+
+  // File System
 
   FAT_HANDLE hFAT;
   FAT_BROWSE_HANDLE FatBrowseHandle;
@@ -75,5 +79,24 @@ int main()
   MPEG_FILE_HEADER mpegHeader;
   read_mpeg_header(hFile, &mpegHeader);
 
+  // init video display
+  ece423_video_display* display = ece423_video_display_init(VIDEO_DMA_CSR_NAME, mpegHeader.w_size, mpegHeader.h_size, FRAME_BUFFER_SIZE);
+  if(!display)
+  {
+	  printf("Failed to init video display\n");
+	  return 0;
+  }
+  printf("Video DMA initialized!\n");
+
+
+
+  // set up frame buffers
+  MPEG_WORKING_BUFFER mpegFrameBuffer;
+  allocate_frame_buffer(&mpegHeader, &mpegFrameBuffer);
+
+  read_next_frame(hFile, &mpegHeader, &mpegFrameBuffer, display->buffer_ptrs[0]->buffer);
+  printf("Generated first buffer\n");
+
+  deallocate_frame_buffer(&mpegFrameBuffer);
   return 0;
 }

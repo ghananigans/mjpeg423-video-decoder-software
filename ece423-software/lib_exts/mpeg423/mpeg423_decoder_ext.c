@@ -6,9 +6,10 @@
  */
 
 #include "mpeg423_decoder_ext.h"
+#include "../../utils.h"
 
 #define ERROR_AND_EXIT(str)  {       \
-    printf("Error: %s\n", str);      \
+    DBG_PRINT("Error: %s\n", str);   \
     return 0;                        \
 }
 
@@ -93,9 +94,6 @@ int read_next_frame(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_WO
 	frame_type  = frame_header[1];
 	Ysize       = frame_header[2];
 	Cbsize      = frame_header[3];
-
-	printf("Frame_size %u\n",frame_size);
-	printf("Frame_type %u\n",frame_type);
 
 	bool read = Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t));
 

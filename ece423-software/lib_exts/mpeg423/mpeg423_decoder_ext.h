@@ -12,7 +12,7 @@
 #include "../../libs/mjpeg423/common/mjpeg423_types.h"
 #include <stdint.h>
 
-#define FRAME_BUFFER_SIZE (4)
+#define DBG_PRINT_LIB_EXT()
 
 typedef struct MPEG_FILE_HEADER_STRUCT
 {

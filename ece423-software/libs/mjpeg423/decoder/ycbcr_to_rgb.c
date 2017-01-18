@@ -10,8 +10,6 @@
 #include "mjpeg423_decoder.h"
 #include "../common/util.h"
 
-#define NULL_COLORCONV
-
 #ifndef NULL_COLORCONV
 
 //normalize result between 0 and 255

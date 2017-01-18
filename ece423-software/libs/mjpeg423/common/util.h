@@ -10,6 +10,7 @@
 #define mjpeg423app_util_h
 
 #include "mjpeg423_types.h"
+#include "../../../config.h"
 
 
 /* Debug print macro. Defining DEBUG_JPEG enables the various DEBUG_ macros to print to terminal.

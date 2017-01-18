@@ -168,6 +168,7 @@ C_SRCS += libs/mjpeg423/libnsbmp/decode_bmp.c
 C_SRCS += libs/mjpeg423/libnsbmp/libnsbmp.c
 C_SRCS += libs/mjpeg423/sample_main.c
 C_SRCS += lib_exts/mpeg423/mpeg423_decoder_ext.c
+C_SRCS += playback.c
 CXX_SRCS :=
 ASM_SRCS :=
 

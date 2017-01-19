@@ -90,7 +90,7 @@ JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ece423_prefab_w2017/ece423_prefab/E
 
 # Qsys--generated SOPCINFO file. Required for resolving node instance ID's with 
 # design component names. 
-SOPCINFO_FILE := C:/Users/ggowripa/Documents/PortableGit/ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
+SOPCINFO_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
 
 # Big-Endian operation. 
 # setting BIG_ENDIAN is false

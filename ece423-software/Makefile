@@ -169,6 +169,7 @@ C_SRCS += libs/mjpeg423/libnsbmp/libnsbmp.c
 C_SRCS += libs/mjpeg423/sample_main.c
 C_SRCS += lib_exts/mpeg423/mpeg423_decoder_ext.c
 C_SRCS += playback.c
+C_SRCS += key_controls.c
 CXX_SRCS :=
 ASM_SRCS :=
 
@@ -188,7 +189,7 @@ CREATE_LINKER_MAP := 1
 # Common arguments for ALT_CFLAGSs
 APP_CFLAGS_DEFINED_SYMBOLS :=
 APP_CFLAGS_UNDEFINED_SYMBOLS :=
-APP_CFLAGS_OPTIMIZATION := -O0
+APP_CFLAGS_OPTIMIZATION := -O2
 APP_CFLAGS_DEBUG_LEVEL := -g
 APP_CFLAGS_WARNINGS := -Wall
 APP_CFLAGS_USER_FLAGS := -std=c99

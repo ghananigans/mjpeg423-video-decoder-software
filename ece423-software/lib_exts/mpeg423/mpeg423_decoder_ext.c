@@ -37,11 +37,11 @@ int read_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
 	mpegHeader->num_iframes = file_header[3];
 	mpegHeader->payload_size = file_header[4];
 
-	printf("Decoder start. Num frames #%u\n", mpegHeader->num_frames);
-	printf("Width %u\n", mpegHeader->w_size);
-	printf("Height %u\n", mpegHeader->h_size);
-	printf("Num i frames %u\n", mpegHeader->num_iframes);
-	printf("Payload size %u\n", mpegHeader->payload_size);
+	DBG_PRINT("MPG File header read: \n   Num frames %u\n", mpegHeader->num_frames);
+	DBG_PRINT("   Width %u\n", mpegHeader->w_size);
+	DBG_PRINT("   Height %u\n", mpegHeader->h_size);
+	DBG_PRINT("   Num i frames %u\n", mpegHeader->num_iframes);
+	DBG_PRINT("   Payload size %u\n", mpegHeader->payload_size);
 }
 
 int allocate_frame_buffer(MPEG_FILE_HEADER* mpegHeader, MPEG_WORKING_BUFFER* mpegFrameBuffer)

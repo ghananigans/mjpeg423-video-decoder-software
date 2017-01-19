@@ -37,6 +37,9 @@ int main() {
 	FILE_CONTEXT fileContext;
 	uint8_t* currentOutputBuffer;
 	uint32_t retVal;
+	int keyPressed;
+
+
 
 	retVal = SDLIB_Init(SD_CONT_BASE);
 	assert(retVal, "SDLIB_Init failed!")
@@ -51,7 +54,13 @@ int main() {
 		VIDEO_DMA_CSR_NAME, DISPLAY_HEIGHT, DISPLAY_WIDTH, NUM_OUTPUT_BUFFERS);
 	assert(display, "Video display init failed!")
 
+	retVal = initKeyIrq();
+	assert(display, "Failed to init keys")
+
 	DBG_PRINT("Initialization complete!\n");
+
+
+
 
 	bool fileFound = 0;
 
@@ -67,14 +76,17 @@ int main() {
 	DBG_PRINT("File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext),
 			fileContext.FileSize);
 
-	loadVideo(hFAT, Fat_GetFileName(&fileContext));
-	playVideo(display);
+	// main loop
+	while(1){
+		DBG_PRINT("Starting video done\n");
+		loadVideo(hFAT, Fat_GetFileName(&fileContext));
+		playVideo(display);
+		DBG_PRINT("Video done\n");
+		closeVideo();
 
-	DBG_PRINT("Video done\n");
-
-	closeVideo();
-
-	DBG_PRINT("Program end\n");
+		keyPressed = waitForButtonPress();
+		printf("Key pressed %d\n", keyPressed);
+	}
 
 	return 0;
 }

@@ -2,9 +2,9 @@
  * system.h - SOPC Builder system and BSP software package information
  *
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
- * SOPC Builder design path: C:/Users/ggowripa/Documents/PortableGit/ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
+ * SOPC Builder design path: ../../ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Jan 17 21:45:53 EST 2017
+ * Generated: Wed Jan 18 21:16:03 EST 2017
  */
 
 /*
@@ -196,7 +196,7 @@
 #define ALT_INCLUDE_INSTRUCTION_RELATED_EXCEPTION_API
 #define ALT_MAX_FD 32
 #define ALT_SYS_CLK TIMER_0
-#define ALT_TIMESTAMP_CLK none
+#define ALT_TIMESTAMP_CLK TIMER_0
 
 
 /*

@@ -37,11 +37,14 @@ int read_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
 	mpegHeader->num_iframes = file_header[3];
 	mpegHeader->payload_size = file_header[4];
 
-	DBG_PRINT("MPG File header read: \n   Num frames %u\n", mpegHeader->num_frames);
+	DBG_PRINT("MPG File header read: \n");
+	DBG_PRINT("   Num frames %u\n", mpegHeader->num_frames);
 	DBG_PRINT("   Width %u\n", mpegHeader->w_size);
 	DBG_PRINT("   Height %u\n", mpegHeader->h_size);
 	DBG_PRINT("   Num i frames %u\n", mpegHeader->num_iframes);
 	DBG_PRINT("   Payload size %u\n", mpegHeader->payload_size);
+
+	return 1;
 }
 
 int allocate_frame_buffer(MPEG_FILE_HEADER* mpegHeader, MPEG_WORKING_BUFFER* mpegFrameBuffer)

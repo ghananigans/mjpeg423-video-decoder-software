@@ -63,9 +63,11 @@ void loadVideo(FAT_HANDLE hFat, char* filename){
 	assert(playbackData.hFile, "Error in opening file!\n")
 
 	read_mpeg_header(playbackData.hFile, &playbackData.mpegHeader);
+	assert(playbackData.mpegHeader.w_size == DISPLAY_WIDTH, "Video file width unrecognized\n");
+	assert(playbackData.mpegHeader.h_size == DISPLAY_HEIGHT, "Video file height unrecognized\n");
 
 	retVal = allocate_frame_buffer(&playbackData.mpegHeader, &playbackData.mpegFrameBuffer);
-	assert(retVal, "Failed to allocate frame buffer")
+	assert(retVal, "Failed to allocate frame buffer");
 }
 
 // TODO: we need to make this timer based
@@ -92,6 +94,7 @@ void playVideo(ece423_video_display* display) {
 		ece423_video_display_register_written_buffer(display);
 
 		//flip to next frame
+
 		assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
 		while(!switchFrame){}  // wait for the frame timer to fire
 		ece423_video_display_switch_frames(display);

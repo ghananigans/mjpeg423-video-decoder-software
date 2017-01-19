@@ -8,16 +8,18 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-#define DBG_PRINT(str, ...) printf(str, ##__VA_ARGS__)
+#define DBG_PRINT(str, ...)	printf("[%s:%d] " str, 		\
+				__FUNCTION__, __LINE__, ##__VA_ARGS__);	\
 
 // Asserts on !x and prints errorstr
-#define assert(x, errorStr, ...)					\
-	{												\
-		if (!(x)) {									\
-			printf("** Asserting with error: ");	\
-			printf(errorStr, ##__VA_ARGS__);		\
-			while (1) {}							\
-		}											\
+#define assert(x, errorStr, ...)						\
+	{													\
+		if (!(x)) {										\
+			printf("[%s:%d]** Asserting with error: "	\
+					errorStr, __FUNCTION__, __LINE__, 	\
+					##__VA_ARGS__);						\
+			while (1) {}								\
+		}												\
 	}
 
 // Basic true false definitions, be careful of checking for something == true,

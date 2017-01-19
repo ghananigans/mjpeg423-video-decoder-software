@@ -59,9 +59,6 @@ int main() {
 
 	DBG_PRINT("Initialization complete!\n");
 
-
-
-
 	bool fileFound = 0;
 
 	while (Fat_FileBrowseNext(&FatBrowseHandle, &fileContext)) {
@@ -81,7 +78,7 @@ int main() {
 		DBG_PRINT("Starting video done\n");
 		loadVideo(hFAT, Fat_GetFileName(&fileContext));
 		playVideo(display);
-		DBG_PRINT("Video done\n");
+		DBG_PRINT("Video stopped\n");
 		closeVideo();
 
 		keyPressed = waitForButtonPress();

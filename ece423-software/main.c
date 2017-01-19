@@ -103,7 +103,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 		// push button presses
 		//
 		while (1) {
-			printf("\n\n\nPress Push Button 0 to play video\n");
+			printf("Press Push Button 0 to play video\n");
 
 			keyPressed = waitForButtonPress();
 			DBG_PRINT("Key pressed %d\n", keyPressed);
@@ -163,7 +163,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 				}
 			}
 
-			DBG_PRINT("Playing video\n")
+			DBG_PRINT("Playing video\n");
 			playVideo(display, &buttonHasBeenPressed); // Can stop because video ended OR
 
 			DBG_PRINT("Video stopped\n");

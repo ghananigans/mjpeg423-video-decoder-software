@@ -53,7 +53,7 @@ static inline void stopPlaybackFrameTimer (void) {
  *   Private playback api
  */
 
-static void playFrame (ece423_video_display* display) {
+static void playFrame (ece423_video_display* display, bool forcePeriodic) {
 	int retVal;
 	uint32_t* currentOutputBuffer;
 
@@ -72,8 +72,10 @@ static void playFrame (ece423_video_display* display) {
 	ece423_video_display_register_written_buffer(display);
 
 	// Flip to next frame
-	assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
-	while (!switchFrame){}  // wait for the frame timer to fire
+	if (forcePeriodic) {
+		assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
+		while (!switchFrame){}  // wait for the frame timer to fire
+	}
 	ece423_video_display_switch_frames(display);
 	switchFrame = false;
 
@@ -107,13 +109,13 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 
 
 void previewVideo (ece423_video_display* display) {
-	startPlaybackFrameTimer();
+	//startPlaybackFrameTimer();
 
 	if (playbackData.currentFrame < playbackData.mpegHeader.num_frames) {
-		playFrame(display);
+		playFrame(display, 0);
 	}
 
-	stopPlaybackFrameTimer();
+	//stopPlaybackFrameTimer();
 }
 
 // TODO: we need to make this timer based
@@ -124,7 +126,7 @@ void playVideo (ece423_video_display* display, bool *functionToStopPlayingFrames
 	startPlaybackFrameTimer();
 
 	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames && !functionToStopPlayingFrames()) {
-		playFrame(display);
+		playFrame(display, 1);
 	}
 
 	stopPlaybackFrameTimer();

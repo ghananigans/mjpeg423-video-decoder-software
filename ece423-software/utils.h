@@ -9,12 +9,21 @@
 #define UTILS_H_
 
 //
+// Comment this out to remove print statements
+//
+#define DEBUG_PRINT_ENABLED
+
+//
 // DBG_PRINT used to print debug statements
 // Use this so we can easily remove debug statements
 // with minimal code changes
 //
+#ifdef DEBUG_PRINT_ENABLED
 #define DBG_PRINT(str, ...)	printf("[%s:%d] " str, 		\
-				__FUNCTION__, __LINE__, ##__VA_ARGS__);	\
+				__FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#define DBG_PRINT(str, ...) ((void) 0)
+#endif
 
 //
 // Asserts on !x and prints errorstr

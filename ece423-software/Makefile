@@ -215,7 +215,7 @@ APP_LIBRARY_NAMES :=
 BUILD_PRE_PROCESS :=
 BUILD_POST_PROCESS :=
 
-QUARTUS_PROJECT_DIR := C:/Users/ggowripa/Documents/GIT/ece423/ece423_prefab_w2017/ece423_prefab/
+QUARTUS_PROJECT_DIR := C:/Users/ggowripa/Documents/PortableGit/ece423/ece423_prefab_w2017/ece423_prefab/
 
 
 #END GENERATED

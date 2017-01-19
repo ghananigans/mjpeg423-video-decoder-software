@@ -13,7 +13,9 @@
 
 void loadVideo(FAT_HANDLE hFat, char* filename);
 void playVideo(ece423_video_display* display);
-void closeVideo();
+bool isVideoPlaying(void);
+void pauseVideo(void);
+void closeVideo(void);
 
 
 

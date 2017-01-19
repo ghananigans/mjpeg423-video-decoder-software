@@ -106,8 +106,17 @@ void playVideo(ece423_video_display* display) {
 	stopPlaybackFrameTimer();
 }
 
-void closeVideo(){
+bool isVideoPlaying(void) {
+	return playbackData.playing;
+}
+
+void pauseVideo(void) {
 	playbackData.playing = false;
+}
+
+void closeVideo(void){
+	playbackData.playing = false;
+	Fat_FileClose(playbackData.hFile);
 	deallocate_frame_buffer(&playbackData.mpegFrameBuffer);
 }
 

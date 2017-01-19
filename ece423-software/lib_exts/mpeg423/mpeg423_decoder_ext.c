@@ -74,6 +74,8 @@ int load_mpeg_trailer (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG
 		printf("Failed to seek back to beginning of payload\n");
 		return 0;
 	}
+
+	return 1;
 }
 
 void unload_mpeg_trailer (MPEG_FILE_TRAILER* mpegTrailer) {
@@ -182,4 +184,6 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 					mpegFrameBuffer->Cbblock[b], mpegFrameBuffer->Crblock[b], outputBuffer);
 		}
 	}
+
+	return 1;
 }

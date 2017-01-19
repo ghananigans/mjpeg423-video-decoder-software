@@ -25,6 +25,7 @@ static void keyIrq (void* isr_context) {
 	//
 	IOWR_ALTERA_AVALON_PIO_EDGE_CAP(KEY_BASE, 0x0);
 
+	//
 	// From the nios II handbook:
 	// Read the PIO to delay ISR exit. This is done to prevent a spurious interrupt in systems
 	// with high processor -> pio latency and fast interrupts.

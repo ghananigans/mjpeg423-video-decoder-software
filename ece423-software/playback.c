@@ -42,11 +42,13 @@ static inline alt_u32 frameTimerCallback (void* context) {
 }
 
 static inline int startPlaybackFrameTimer (void) {
+	switchFrame = false;
 	return alt_alarm_start(&frameTimer, FRAME_RATE_MS, frameTimerCallback, NULL);
 }
 
 static inline void stopPlaybackFrameTimer (void) {
 	alt_alarm_stop(&frameTimer);
+	switchFrame = false;
 }
 
 /*
@@ -65,7 +67,8 @@ static void playFrame (ece423_video_display* display, bool forcePeriodic) {
 
 	// Read and decode frame and write it to the buffer
 	DBG_PRINT("Frame #%u:\n", playbackData.currentFrame);
-	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
+	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader,
+			&playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
 	assert(retVal, "Failed to load next frame!");
 
 	// Flag the buffer as written
@@ -82,6 +85,22 @@ static void playFrame (ece423_video_display* display, bool forcePeriodic) {
 	playbackData.currentFrame++;
 }
 
+static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
+	bool error;
+
+	DBG_PRINT("Move to frame #%u from current frame #%u\n",
+			frameIndex,
+			playbackData.currentFrame);
+
+	playbackData.currentFrame = frameIndex;
+
+	//
+	// Move file to frame
+	//
+	error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
+			framePosition);
+	assert(error, "Failed to seek file\n");
+}
 
 /*
  * 	 Public playback api
@@ -119,15 +138,30 @@ void previewVideo (ece423_video_display* display) {
 }
 
 // TODO: we need to make this timer based
-void playVideo (ece423_video_display* display, bool *functionToStopPlayingFrames(void)) {
-	DBG_PRINT("Play the video\n");
+void playVideo (ece423_video_display* display, int *functionToStopPlayingFrames(void)) {
+	DBG_PRINT("Playing the video\n");
 
-	playbackData.playing = true;
+	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
+	if (!playbackData.playing) {
+		DBG_PRINT("At the end of the video, can't play\n");
+		return;
+	}
+
 	startPlaybackFrameTimer();
 
-	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames && !functionToStopPlayingFrames()) {
+	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames
+			&& functionToStopPlayingFrames() == 0) {
 		playFrame(display, 1);
 	}
+
+	//
+	// If there are still frames left to be played
+	// we know that we are not exiting the loop due to
+	// video being done; it is because of some other
+	// reason (functionToStopPlayingFrames returned
+	// logical true).
+	//
+	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
 
 	stopPlaybackFrameTimer();
 }
@@ -136,7 +170,7 @@ bool isVideoPlaying (void) {
 	return playbackData.playing;
 }
 
-int fastforwardVideo (void) {
+int fastForwardVideo (void) {
 	int index;
 	int error;
 
@@ -150,25 +184,26 @@ int fastforwardVideo (void) {
 	//
 	// We know we wont go past the end of the
 	// iframe trailer information since
-	// we have at least 120 frames between current frame
-	// and last frame
+	// we have at least 120 frames (atleats 108) between
+	// current frame and last frame
 	//
-	while (1) {
-		if ((int)playbackData.mpegTrailer.iframe_info[++index].frame_index - (int)playbackData.currentFrame > 110) {
-			DBG_PRINT("Fast forwarded to frame #%u from current frame #%u\n",
-					playbackData.mpegTrailer.iframe_info[index].frame_index,
-					playbackData.currentFrame);
-
-			playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[index].frame_index;
-
-			// move to fast forward-ed frame
-			error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
-					playbackData.mpegTrailer.iframe_info[index].frame_position);
-			assert(error, "Failed to seek file\n");
-
+	while (++index < playbackData.mpegTrailer.num_iframes) {
+		//
+		// Check if next possible iframe's frame index is atleast 108 frames
+		// from the current frame. 108 is the magic number because
+		// Iframes will occur ever 24 frames (at max), we just need to be
+		// 120 +- 12 frames. If there is an iframe at 108, then we can be sure
+		// there will be an iframe by 132. This means we will always get
+		// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
+		//
+		if ((int)playbackData.mpegTrailer.iframe_info[index].frame_index - (int)playbackData.currentFrame >= 108) {
 			break;
 		}
 	}
+
+	DBG_PRINT("Fast Forwarding...\n");
+	seekFrame(playbackData.mpegTrailer.iframe_info[index].frame_index,
+			playbackData.mpegTrailer.iframe_info[index].frame_position);
 
 	return 1;
 }
@@ -184,22 +219,23 @@ void rewindVideo (void) {
 		index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
 	}
 
-	while (index > 0) {
-		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[--index].frame_index > 110) {
+	while (--index >= 0) {
+		//
+		// Check if next possible iframe's frame index is atleast 108 frames
+		// from the current frame. 108 is the magic number because
+		// Iframes will occur ever 24 frames (at max), we just need to be
+		// 120 +- 12 frames. If there is an iframe at 108, then we can be sure
+		// there will be an iframe by 132. This means we will always get
+		// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
+		//
+		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[index].frame_index >= 108) {
 			break;
 		}
 	}
 
-	DBG_PRINT("Rewind to frame #%u from current frame #%u\n",
-			playbackData.mpegTrailer.iframe_info[index].frame_index,
-			playbackData.currentFrame);
-
-	playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[index].frame_index;
-
-	// move to rewinded frame
-	error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
-			playbackData.mpegTrailer.iframe_info[index].frame_position);
-	assert(error, "Failed to seek file\n");
+	DBG_PRINT("Rewinding...\n");
+	seekFrame(playbackData.mpegTrailer.iframe_info[index].frame_index,
+				playbackData.mpegTrailer.iframe_info[index].frame_position);
 }
 
 void pauseVideo (void) {

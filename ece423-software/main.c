@@ -131,7 +131,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 			} else if (keyPressed & FAST_FORWARD_VIDEO_BUTTON) {
 				DBG_PRINT("Fast forward button pressed\n");
 
-				retVal = fastforwardVideo();
+				retVal = fastForwardVideo();
 
 				if (!retVal) {
 					//

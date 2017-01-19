@@ -15,6 +15,8 @@
 #include "sys/alt_alarm.h"
 #include "key_controls.h"
 
+#define MAX_IFRAME_OFFSET (24)
+
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
 	uint32_t currentFrame; // 0 index frames
@@ -125,6 +127,41 @@ void playVideo(ece423_video_display* display) {
 
 bool isVideoPlaying(void) {
 	return playbackData.playing;
+}
+
+int fastforwardVideo() {
+	int tempIndex;
+	int error;
+
+	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120)
+	{
+		DBG_PRINT("Fast forwarded to end of video\n");
+		return 0;
+	}
+
+	tempIndex = playbackData.currentFrame / MAX_IFRAME_OFFSET;
+
+	while (1) {
+		++tempIndex;
+
+		if (playbackData.mpegTrailer.iframe_info[tempIndex].frame_index - playbackData.currentFrame > 110)
+		{
+			DBG_PRINT("Fast forwarded to frame #%d from current frame #%d\n",
+					playbackData.mpegTrailer.iframe_info[tempIndex].frame_index,
+					playbackData.currentFrame);
+
+			playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[tempIndex].frame_index;
+
+			// move to fast forward-ed frame
+			error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
+					playbackData.mpegTrailer.iframe_info[tempIndex].frame_position);
+			assert(error, "Failed to seek file\n");
+
+			break;
+		}
+	}
+
+	return 1;
 }
 
 void pauseVideo(void) {

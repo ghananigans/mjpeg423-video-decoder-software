@@ -30,7 +30,7 @@
 
 #define PLAY_PAUSE_VIDEO_BUTTON	(1)
 #define LOAD_NEXT_VIDEO_BUTTON	(2)
-#define FORWARD_BUTTON			(4)
+#define FAST_FORWARD_BUTTON		(4)
 #define REWIND_BUTTON			(8)
 
 int main() {
@@ -155,6 +155,19 @@ int main() {
 			} else if (keyPressed & LOAD_NEXT_VIDEO_BUTTON) {
 				DBG_PRINT("Load next video button pressed\n");
 				break;
+			} else if (keyPressed & FAST_FORWARD_BUTTON) {
+				DBG_PRINT("Fast forward button pressed\n");
+				int ret;
+				ret = fastforwardVideo();
+
+				if (!ret) {
+					// Close to the end of the video
+					// Just stop the video
+					pauseVideo();
+					continue;
+				}
+			} else if (keyPressed & REWIND_BUTTON) {
+				DBG_PRINT("Rewind button pressed\n");
 			}
 
 			DBG_PRINT("Playing video\n")

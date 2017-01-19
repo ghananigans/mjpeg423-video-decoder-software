@@ -70,37 +70,50 @@ void loadVideo(FAT_HANDLE hFat, char* filename){
 	assert(retVal, "Failed to allocate frame buffer");
 }
 
+void playFrame(ece423_video_display* display) {
+	int retVal;
+	uint32_t* currentOutputBuffer;
+
+	// Wait until a buffer is available again
+	while (ece423_video_display_buffer_is_available(display) != 0){}
+
+	// Get a pointer to the available buffer
+	currentOutputBuffer = ece423_video_display_get_buffer(display);
+
+	// Read and decode frame and write it to the buffer
+	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
+	assert(retVal, "Failed to load next frame!");
+
+	// Flag the buffer as written
+	ece423_video_display_register_written_buffer(display);
+
+	//flip to next frame
+
+	assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
+	while(!switchFrame){}  // wait for the frame timer to fire
+	ece423_video_display_switch_frames(display);
+	switchFrame = false;
+
+	playbackData.currentFrame++;
+}
+
+void previewVideo(ece423_video_display* display) {
+	startPlaybackFrameTimer();
+
+	if (playbackData.currentFrame < playbackData.mpegHeader.num_frames) {
+		playFrame(display);
+	}
+
+	stopPlaybackFrameTimer();
+}
+
 // TODO: we need to make this timer based
 void playVideo(ece423_video_display* display) {
 	playbackData.playing = true;
-	uint32_t* currentOutputBuffer;
-	int retVal;
-
 	startPlaybackFrameTimer();
 
 	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames && !buttonHasBeenPressed()) {
-
-		// Wait until a buffer is available again
-		while (ece423_video_display_buffer_is_available(display) != 0){}
-
-		// Get a pointer to the available buffer
-		currentOutputBuffer = ece423_video_display_get_buffer(display);
-
-		// Read and decode frame and write it to the buffer
-		retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
-		assert(retVal, "Failed to load next frame!");
-
-		// Flag the buffer as written
-		ece423_video_display_register_written_buffer(display);
-
-		//flip to next frame
-
-		assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
-		while(!switchFrame){}  // wait for the frame timer to fire
-		ece423_video_display_switch_frames(display);
-		switchFrame = false;
-
-		playbackData.currentFrame++;
+		playFrame(display);
 	}
 
 	stopPlaybackFrameTimer();

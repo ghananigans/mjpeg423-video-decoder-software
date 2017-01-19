@@ -107,7 +107,7 @@ int main() {
 		//
 		// TODO: Don't make this assumption
 		if (!fileFound) {
-			// End of FAT system
+			// End of FAT system, so loop back to beginning
 			DBG_PRINT("Reached end of file list; Re-Begin File browse\n");
 			retVal = Fat_FileBrowseBegin(hFAT, &FatBrowseHandle);
 			assert(retVal, "Fat_FileBrowseBegin failed!")
@@ -124,6 +124,9 @@ int main() {
 		//
 		DBG_PRINT("Loading video...\n");
 		loadVideo(hFAT, Fat_GetFileName(&fileContext));
+
+		// Preview the video
+		previewVideo(display);
 
 		// Play video and handle
 		// push button presses

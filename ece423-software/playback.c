@@ -13,7 +13,6 @@
 #include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
 #include "system.h"
 #include "sys/alt_alarm.h"
-#include "key_controls.h"
 
 #define MAX_IFRAME_OFFSET (24)
 
@@ -42,13 +41,45 @@ static inline alt_u32 frameTimerCallback(void* context){
 	return FRAME_RATE_MS;
 }
 
-static inline int startPlaybackFrameTimer(){
+static inline int startPlaybackFrameTimer(void){
 	return alt_alarm_start(&frameTimer, FRAME_RATE_MS, frameTimerCallback, NULL);
 }
 
-static inline void stopPlaybackFrameTimer(){
+static inline void stopPlaybackFrameTimer(void){
 	alt_alarm_stop(&frameTimer);
 }
+
+/*
+ *   Private playback api
+ */
+
+static void playFrame(ece423_video_display* display) {
+	int retVal;
+	uint32_t* currentOutputBuffer;
+
+	// Wait until a buffer is available again
+	while (ece423_video_display_buffer_is_available(display) != 0){}
+
+	// Get a pointer to the available buffer
+	currentOutputBuffer = ece423_video_display_get_buffer(display);
+
+	// Read and decode frame and write it to the buffer
+	DBG_PRINT("Frame #%u:\n", playbackData.currentFrame);
+	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
+	assert(retVal, "Failed to load next frame!");
+
+	// Flag the buffer as written
+	ece423_video_display_register_written_buffer(display);
+
+	// Flip to next frame
+	assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
+	while(!switchFrame){}  // wait for the frame timer to fire
+	ece423_video_display_switch_frames(display);
+	switchFrame = false;
+
+	playbackData.currentFrame++;
+}
+
 
 /*
  * 	 Public playback api
@@ -75,33 +106,6 @@ void loadVideo(FAT_HANDLE hFat, char* filename){
 	assert(retVal, "Failed to allocate frame buffer");
 }
 
-void playFrame(ece423_video_display* display) {
-	int retVal;
-	uint32_t* currentOutputBuffer;
-
-	// Wait until a buffer is available again
-	while (ece423_video_display_buffer_is_available(display) != 0){}
-
-	// Get a pointer to the available buffer
-	currentOutputBuffer = ece423_video_display_get_buffer(display);
-
-	// Read and decode frame and write it to the buffer
-	DBG_PRINT("Frame #%d:\n", playbackData.currentFrame);
-	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
-	assert(retVal, "Failed to load next frame!");
-
-	// Flag the buffer as written
-	ece423_video_display_register_written_buffer(display);
-
-	//flip to next frame
-
-	assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
-	while(!switchFrame){}  // wait for the frame timer to fire
-	ece423_video_display_switch_frames(display);
-	switchFrame = false;
-
-	playbackData.currentFrame++;
-}
 
 void previewVideo(ece423_video_display* display) {
 	startPlaybackFrameTimer();
@@ -114,11 +118,13 @@ void previewVideo(ece423_video_display* display) {
 }
 
 // TODO: we need to make this timer based
-void playVideo(ece423_video_display* display) {
+void playVideo(ece423_video_display* display, bool *functionToStopPlayingFrames(void)) {
+	DBG_PRINT("Play the video\n");
+
 	playbackData.playing = true;
 	startPlaybackFrameTimer();
 
-	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames && !buttonHasBeenPressed()) {
+	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames && !functionToStopPlayingFrames()) {
 		playFrame(display);
 	}
 
@@ -129,32 +135,36 @@ bool isVideoPlaying(void) {
 	return playbackData.playing;
 }
 
-int fastforwardVideo() {
-	int tempIndex;
+int fastforwardVideo(void) {
+	int index;
 	int error;
 
 	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120)
 	{
-		DBG_PRINT("Fast forwarded to end of video\n");
+		DBG_PRINT("Less than 120 frames left in the video!\n");
 		return 0;
 	}
 
-	tempIndex = playbackData.currentFrame / MAX_IFRAME_OFFSET;
+	index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
 
+	//
+	// We know we wont go past the end of the
+	// iframe trailer information since
+	// we have at least 120 frames between current frame
+	// and last frame
+	//
 	while (1) {
-		++tempIndex;
-
-		if (playbackData.mpegTrailer.iframe_info[tempIndex].frame_index - playbackData.currentFrame > 110)
+		if ((int)playbackData.mpegTrailer.iframe_info[++index].frame_index - (int)playbackData.currentFrame > 110)
 		{
-			DBG_PRINT("Fast forwarded to frame #%d from current frame #%d\n",
-					playbackData.mpegTrailer.iframe_info[tempIndex].frame_index,
+			DBG_PRINT("Fast forwarded to frame #%u from current frame #%u\n",
+					playbackData.mpegTrailer.iframe_info[index].frame_index,
 					playbackData.currentFrame);
 
-			playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[tempIndex].frame_index;
+			playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[index].frame_index;
 
 			// move to fast forward-ed frame
 			error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
-					playbackData.mpegTrailer.iframe_info[tempIndex].frame_position);
+					playbackData.mpegTrailer.iframe_info[index].frame_position);
 			assert(error, "Failed to seek file\n");
 
 			break;
@@ -164,11 +174,46 @@ int fastforwardVideo() {
 	return 1;
 }
 
+void rewindVideo(void) {
+	int index;
+	int error;
+
+	if (playbackData.currentFrame < 120)
+	{
+		DBG_PRINT("Less than 120 frames from beginning of the video; go to start!\n");
+		index = 0;
+	} else {
+		index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
+	}
+
+	while (index > 0) {
+		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[--index].frame_index > 110)
+		{
+			break;
+		}
+	}
+
+	DBG_PRINT("Rewind to frame #%u from current frame #%u\n",
+			playbackData.mpegTrailer.iframe_info[index].frame_index,
+			playbackData.currentFrame);
+
+	playbackData.currentFrame = playbackData.mpegTrailer.iframe_info[index].frame_index;
+
+	// move to rewinded frame
+	error = Fat_FileSeek(playbackData.hFile, FILE_SEEK_BEGIN,
+			playbackData.mpegTrailer.iframe_info[index].frame_position);
+	assert(error, "Failed to seek file\n");
+}
+
 void pauseVideo(void) {
+	DBG_PRINT("Setting playing status to false\n");
+
 	playbackData.playing = false;
 }
 
 void closeVideo(void){
+	DBG_PRINT("Closing video\n");
+
 	playbackData.playing = false;
 	Fat_FileClose(playbackData.hFile);
 	deallocate_frame_buffer(&playbackData.mpegFrameBuffer);

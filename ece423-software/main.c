@@ -136,9 +136,9 @@ int main() {
 			keyPressed = waitForButtonPress();
 			DBG_PRINT("Key pressed %d\n", keyPressed);
 
-			if (keyPressed & PLAY_PAUSE_VIDEO_BUTTON) {\
-				bool currentlyPlaying = isVideoPlaying();
+			bool currentlyPlaying = isVideoPlaying();
 
+			if (keyPressed & PLAY_PAUSE_VIDEO_BUTTON) {\
 				DBG_PRINT("Play/Pause button pressed\n");
 				DBG_PRINT("Currently %s, Going to %s\n",
 						currentlyPlaying ? "Playing" : "Paused",
@@ -154,9 +154,11 @@ int main() {
 				}
 			} else if (keyPressed & LOAD_NEXT_VIDEO_BUTTON) {
 				DBG_PRINT("Load next video button pressed\n");
+
 				break;
 			} else if (keyPressed & FAST_FORWARD_BUTTON) {
 				DBG_PRINT("Fast forward button pressed\n");
+
 				int ret;
 				ret = fastforwardVideo();
 
@@ -166,12 +168,30 @@ int main() {
 					pauseVideo();
 					continue;
 				}
+
+				// Preview the video
+				previewVideo(display);
+
+				if (!currentlyPlaying) {
+					// If not currently playing, then go back to
+					// waiting for user input
+					continue;
+				}
 			} else if (keyPressed & REWIND_BUTTON) {
 				DBG_PRINT("Rewind button pressed\n");
+
+				rewindVideo();
+				previewVideo(display);
+
+				if (!currentlyPlaying) {
+					// If not currently playing, then go back to
+					// waiting for user input
+					continue;
+				}
 			}
 
 			DBG_PRINT("Playing video\n")
-			playVideo(display); // Can stop because video ended OR
+			playVideo(display, &buttonHasBeenPressed); // Can stop because video ended OR
 
 			DBG_PRINT("Video stopped\n");
 		}
@@ -181,62 +201,3 @@ int main() {
 
 	return 0;
 }
-
-// old code
-#if 0
-
-	// opening the file
-	FAT_FILE_HANDLE hFile = Fat_FileOpen(hFAT, Fat_GetFileName(&fileContext));
-	if (!hFile) {
-		printf("Error in opening file!\n");
-		while (1) {
-		}
-	}
-
-	// read the file header
-	MPEG_FILE_HEADER mpegHeader;
-	read_mpeg_header(hFile, &mpegHeader);
-
-	// init video display
-	ece423_video_display* display = ece423_video_display_init(
-			VIDEO_DMA_CSR_NAME, mpegHeader.w_size, mpegHeader.h_size,
-			FRAME_BUFFER_SIZE);
-	if (!display) {
-		printf("Failed to init video display\n");
-		while (1) {
-		}
-	}
-	printf("Video DMA initialized!\n");
-
-	// set up frame buffers
-	MPEG_WORKING_BUFFER mpegFrameBuffer;
-	if (!allocate_frame_buffer(&mpegHeader, &mpegFrameBuffer)) {
-		printf("Failed to allocate working buffers\n");
-		while (1) {
-		}
-	}
-
-	for (int i = 0; i < mpegHeader.num_frames; i++) {
-		// Wait until a buffer is available again
-		while (ece423_video_display_buffer_is_available(display) != 0) {}
-
-		// Get a pointer to the available buffer
-		currentOutputBuffer = ece423_video_display_get_buffer(display);
-
-		// Read and decode frame and write it to the buffer
-		if (!read_next_frame(hFile, &mpegHeader, &mpegFrameBuffer, currentOutputBuffer)) {
-			printf("Failed to read next frame\n");
-			while (1) {
-			}
-		}
-		printf("Generated first buffer\n");
-
-		// Flag the buffer as written
-		ece423_video_display_register_written_buffer(display);
-
-		//flip to next frame
-		printf("Switching frames\n");
-		ece423_video_display_switch_frames(display);
-		printf("Done Switching frames\n");
-	}
-#endif

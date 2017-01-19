@@ -28,7 +28,7 @@ static void keyIrq (void* isr_context){
 	IORD_ALTERA_AVALON_PIO_EDGE_CAP(KEY_BASE);
 }
 
-int initKeyIrq(){
+int initKeyIrq(void){
 	int retVal;
 
 	// enable interrupts
@@ -42,7 +42,7 @@ int initKeyIrq(){
 	return retVal;
 }
 
-int waitForButtonPress(){
+int waitForButtonPress(void){
 	int tempLastButtonPressed;
 
 	while(lastButtonPressed == 0){}
@@ -52,6 +52,6 @@ int waitForButtonPress(){
 	return tempLastButtonPressed;
 }
 
-int buttonHasBeenPressed(){
+int buttonHasBeenPressed(void){
 	return lastButtonPressed;
 }

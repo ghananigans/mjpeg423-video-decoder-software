@@ -8,9 +8,9 @@
 #include "mpeg423_decoder_ext.h"
 #include "../../utils.h"
 
-#define ERROR_AND_EXIT(str)  {       \
-    DBG_PRINT("Error: %s\n", str);   \
-    return 0;                        \
+#define ERROR_AND_EXIT(str) {		\
+    DBG_PRINT("Error: %s\n", str);	\
+    return 0;						\
 }
 
 int load_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {

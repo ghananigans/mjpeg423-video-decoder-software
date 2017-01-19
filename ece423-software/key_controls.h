@@ -10,8 +10,8 @@
 
 #include <stdint.h>
 
-int initKeyIrq();
-int buttonHasBeenPressed();
-int waitForButtonPress();
+int initKeyIrq(void);
+int buttonHasBeenPressed(void);
+int waitForButtonPress(void);
 
 #endif /* KEY_CONTROLS_H_ */

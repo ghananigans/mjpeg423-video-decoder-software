@@ -36,16 +36,16 @@ static PLAYBACK_DATA playbackData;
 
 static alt_alarm frameTimer;
 
-static inline alt_u32 frameTimerCallback(void* context){
+static inline alt_u32 frameTimerCallback (void* context) {
 	switchFrame = true;
 	return FRAME_RATE_MS;
 }
 
-static inline int startPlaybackFrameTimer(void){
+static inline int startPlaybackFrameTimer (void) {
 	return alt_alarm_start(&frameTimer, FRAME_RATE_MS, frameTimerCallback, NULL);
 }
 
-static inline void stopPlaybackFrameTimer(void){
+static inline void stopPlaybackFrameTimer (void) {
 	alt_alarm_stop(&frameTimer);
 }
 
@@ -53,7 +53,7 @@ static inline void stopPlaybackFrameTimer(void){
  *   Private playback api
  */
 
-static void playFrame(ece423_video_display* display) {
+static void playFrame (ece423_video_display* display) {
 	int retVal;
 	uint32_t* currentOutputBuffer;
 
@@ -73,7 +73,7 @@ static void playFrame(ece423_video_display* display) {
 
 	// Flip to next frame
 	assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
-	while(!switchFrame){}  // wait for the frame timer to fire
+	while (!switchFrame){}  // wait for the frame timer to fire
 	ece423_video_display_switch_frames(display);
 	switchFrame = false;
 
@@ -85,8 +85,7 @@ static void playFrame(ece423_video_display* display) {
  * 	 Public playback api
  */
 
-void loadVideo(FAT_HANDLE hFat, char* filename){
-
+void loadVideo (FAT_HANDLE hFat, char* filename) {
 	int retVal;
 
 	playbackData.playing = false;
@@ -107,7 +106,7 @@ void loadVideo(FAT_HANDLE hFat, char* filename){
 }
 
 
-void previewVideo(ece423_video_display* display) {
+void previewVideo (ece423_video_display* display) {
 	startPlaybackFrameTimer();
 
 	if (playbackData.currentFrame < playbackData.mpegHeader.num_frames) {
@@ -118,7 +117,7 @@ void previewVideo(ece423_video_display* display) {
 }
 
 // TODO: we need to make this timer based
-void playVideo(ece423_video_display* display, bool *functionToStopPlayingFrames(void)) {
+void playVideo (ece423_video_display* display, bool *functionToStopPlayingFrames(void)) {
 	DBG_PRINT("Play the video\n");
 
 	playbackData.playing = true;
@@ -131,16 +130,15 @@ void playVideo(ece423_video_display* display, bool *functionToStopPlayingFrames(
 	stopPlaybackFrameTimer();
 }
 
-bool isVideoPlaying(void) {
+bool isVideoPlaying (void) {
 	return playbackData.playing;
 }
 
-int fastforwardVideo(void) {
+int fastforwardVideo (void) {
 	int index;
 	int error;
 
-	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120)
-	{
+	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames left in the video!\n");
 		return 0;
 	}
@@ -154,8 +152,7 @@ int fastforwardVideo(void) {
 	// and last frame
 	//
 	while (1) {
-		if ((int)playbackData.mpegTrailer.iframe_info[++index].frame_index - (int)playbackData.currentFrame > 110)
-		{
+		if ((int)playbackData.mpegTrailer.iframe_info[++index].frame_index - (int)playbackData.currentFrame > 110) {
 			DBG_PRINT("Fast forwarded to frame #%u from current frame #%u\n",
 					playbackData.mpegTrailer.iframe_info[index].frame_index,
 					playbackData.currentFrame);
@@ -174,12 +171,11 @@ int fastforwardVideo(void) {
 	return 1;
 }
 
-void rewindVideo(void) {
+void rewindVideo (void) {
 	int index;
 	int error;
 
-	if (playbackData.currentFrame < 120)
-	{
+	if (playbackData.currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames from beginning of the video; go to start!\n");
 		index = 0;
 	} else {
@@ -187,8 +183,7 @@ void rewindVideo(void) {
 	}
 
 	while (index > 0) {
-		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[--index].frame_index > 110)
-		{
+		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[--index].frame_index > 110) {
 			break;
 		}
 	}
@@ -205,13 +200,13 @@ void rewindVideo(void) {
 	assert(error, "Failed to seek file\n");
 }
 
-void pauseVideo(void) {
+void pauseVideo (void) {
 	DBG_PRINT("Setting playing status to false\n");
 
 	playbackData.playing = false;
 }
 
-void closeVideo(void){
+void closeVideo (void) {
 	DBG_PRINT("Closing video\n");
 
 	playbackData.playing = false;

@@ -9,7 +9,7 @@
 #define CONFIG_H_
 
 // this forces the use of the null implementation of ycbcr_to_rgb in ycbcr_to_rgb.c
-// without this the coulors look weird :/ not sure why
+// without this the colours look weird :/ not sure why
 #define NULL_COLORCONV
 
 // The size of the display

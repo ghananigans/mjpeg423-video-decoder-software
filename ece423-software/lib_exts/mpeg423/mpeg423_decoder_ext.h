@@ -16,7 +16,11 @@
 
 typedef struct MPEG_FILE_HEADER_STRUCT
 {
-	uint32_t num_frames, w_size, h_size, num_iframes, payload_size;
+	uint32_t num_frames;
+	uint32_t w_size;
+	uint32_t h_size;
+	uint32_t num_iframes;
+	uint32_t payload_size;
 } MPEG_FILE_HEADER;
 
 typedef struct MPEG_IFRAME_INFO_STRUCT
@@ -44,11 +48,19 @@ typedef struct MPEG_WORKING_BUFFER_STRUCT
 	dct_block_t* CrDCAC;
 } MPEG_WORKING_BUFFER;
 
-int load_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader);
-int load_mpeg_trailer(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer);
-void unload_mpeg_trailer(MPEG_FILE_TRAILER* mpegTrailer);
-int allocate_frame_buffer(MPEG_FILE_HEADER* mpegHeader, MPEG_WORKING_BUFFER* mpegFrameBuffer);
-void deallocate_frame_buffer(MPEG_WORKING_BUFFER* mpegFrameBuffer);
-int read_next_frame(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_WORKING_BUFFER* mpegFrameBuffer, rgb_pixel_t* outputBuffer);
+int load_mpeg_header (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader);
+
+int load_mpeg_trailer (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader,
+		MPEG_FILE_TRAILER* mpegTrailer);
+
+void unload_mpeg_trailer (MPEG_FILE_TRAILER* mpegTrailer);
+
+int allocate_frame_buffer (MPEG_FILE_HEADER* mpegHeader,
+		MPEG_WORKING_BUFFER* mpegFrameBuffer);
+
+void deallocate_frame_buffer (MPEG_WORKING_BUFFER* mpegFrameBuffer);
+
+int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader,
+		MPEG_WORKING_BUFFER* mpegFrameBuffer, rgb_pixel_t* outputBuffer);
 
 #endif /* MPEG423_DECODER_EXT_H_ */

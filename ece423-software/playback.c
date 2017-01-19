@@ -20,6 +20,7 @@ typedef struct PLAYBACK_DATA_STRUCT{
 	uint32_t currentFrame; // 0 index frames
 	FAT_FILE_HANDLE hFile;
 	MPEG_FILE_HEADER mpegHeader;
+	MPEG_FILE_TRAILER mpegTrailer;
 	MPEG_WORKING_BUFFER mpegFrameBuffer;
 }PLAYBACK_DATA;
 
@@ -62,9 +63,11 @@ void loadVideo(FAT_HANDLE hFat, char* filename){
 	playbackData.hFile = Fat_FileOpen(hFat, filename);
 	assert(playbackData.hFile, "Error in opening file!\n")
 
-	read_mpeg_header(playbackData.hFile, &playbackData.mpegHeader);
+	load_mpeg_header(playbackData.hFile, &playbackData.mpegHeader);
 	assert(playbackData.mpegHeader.w_size == DISPLAY_WIDTH, "Video file width unrecognized\n");
 	assert(playbackData.mpegHeader.h_size == DISPLAY_HEIGHT, "Video file height unrecognized\n");
+
+	load_mpeg_trailer(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegTrailer);
 
 	retVal = allocate_frame_buffer(&playbackData.mpegHeader, &playbackData.mpegFrameBuffer);
 	assert(retVal, "Failed to allocate frame buffer");
@@ -81,6 +84,7 @@ void playFrame(ece423_video_display* display) {
 	currentOutputBuffer = ece423_video_display_get_buffer(display);
 
 	// Read and decode frame and write it to the buffer
+	DBG_PRINT("Frame #%d:\n", playbackData.currentFrame);
 	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader, &playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
 	assert(retVal, "Failed to load next frame!");
 
@@ -131,6 +135,7 @@ void closeVideo(void){
 	playbackData.playing = false;
 	Fat_FileClose(playbackData.hFile);
 	deallocate_frame_buffer(&playbackData.mpegFrameBuffer);
+	unload_mpeg_trailer(&playbackData.mpegTrailer);
 }
 
 

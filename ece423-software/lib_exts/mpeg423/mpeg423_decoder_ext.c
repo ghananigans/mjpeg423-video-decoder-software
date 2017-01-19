@@ -13,7 +13,7 @@
     return 0;                        \
 }
 
-int read_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
+int load_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
 	//header and payload info
 	uint32_t file_header[5];
 
@@ -45,6 +45,45 @@ int read_mpeg_header(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
 	DBG_PRINT("   Payload size %u\n", mpegHeader->payload_size);
 
 	return 1;
+}
+
+int load_mpeg_trailer(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer) {
+	mpegTrailer->iframe_info = malloc(mpegHeader->num_iframes*sizeof(MPEG_IFRAME_INFO));
+	mpegTrailer->num_iframes = mpegHeader->num_iframes;
+
+	// move to trailer
+	// Assume that current position is at beginning of payload
+	if(!Fat_FileSeek(hFile, FILE_SEEK_CURRENT, mpegHeader->payload_size))
+	{
+		printf("Failed to seek file\n");
+		return 0;
+	}
+
+	//read trailer
+	if(!Fat_FileRead(hFile, (void*)mpegTrailer->iframe_info, mpegHeader->num_iframes*sizeof(MPEG_IFRAME_INFO)))
+	{
+		printf("Failed to read the trailer.\n");
+		return 0;
+	}
+
+	for(int i = 0; i < mpegTrailer->num_iframes; i++)
+	{
+		DBG_PRINT("Iframe #%d\n", i);
+		DBG_PRINT("    Frame Number: %d\n", mpegTrailer->iframe_info[i].frame_index);
+		DBG_PRINT("    Frame payload offset: %d\n", mpegTrailer->iframe_info[i].frame_position);
+	}
+
+	if(!Fat_FileSeek(hFile, FILE_SEEK_BEGIN, 5 * sizeof(uint32_t)))
+	{
+		printf("Failed to seek back to beginning of payload\n");
+		return 0;
+	}
+}
+
+void unload_mpeg_trailer(MPEG_FILE_TRAILER* mpegTrailer)
+{
+	free(mpegTrailer->iframe_info);
+	mpegTrailer->iframe_info = NULL;
 }
 
 int allocate_frame_buffer(MPEG_FILE_HEADER* mpegHeader, MPEG_WORKING_BUFFER* mpegFrameBuffer)
@@ -97,6 +136,9 @@ int read_next_frame(FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_WO
 	frame_type  = frame_header[1];
 	Ysize       = frame_header[2];
 	Cbsize      = frame_header[3];
+
+	DBG_PRINT("MPG Frame size: %d: \n", frame_size);
+	DBG_PRINT("MPG Frame type: 0x%x: \n", frame_type);
 
 	bool read = Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t));
 

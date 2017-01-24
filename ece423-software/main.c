@@ -28,6 +28,8 @@
 #include "key_controls.h"
 #include "libs/ece423_sd/ece423_sd.h"
 
+#include <sys/alt_timestamp.h>
+
 #define PLAY_PAUSE_VIDEO_BUTTON		(1)
 #define LOAD_NEXT_VIDEO_BUTTON		(2)
 #define FAST_FORWARD_VIDEO_BUTTON	(4)
@@ -180,6 +182,18 @@ int main() {
 	FAT_HANDLE hFAT;
 	FAT_BROWSE_HANDLE FatBrowseHandle;
 	int retVal;
+	int timingCount;
+	uint32_t timingCounterVal;
+
+#ifdef TIMING_TESTS
+	for (timingCount = 10; timingCount != 0; --timingCount) {
+		retVal = alt_timestamp_start();
+		timingCounterVal = alt_timestamp();
+
+		assert(retVal == 0, "Retval not 0; Got %d\n", retVal);
+		TIMING_PRINT("Empty Timing Count Val #%d:%u\n", timingCount, timingCounterVal);
+	}
+#endif // #ifdef TIMING_TESTS
 
 	//
 	// Init the SD
@@ -210,7 +224,7 @@ int main() {
 	// Init Keypress interrupts
 	//
 	retVal = initKeyIrq();
-	assert(display, "Failed to init keys");
+	assert(retVal, "Failed to init keys");
 
 	DBG_PRINT("Initialization complete!\n");
 

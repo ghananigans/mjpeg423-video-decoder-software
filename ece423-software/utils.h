@@ -11,7 +11,7 @@
 //
 // Comment this out to disable timing reports
 //
-//#define TIMING_TESTS
+#define TIMING_TESTS
 
 #ifdef TIMING_TESTS
 #define TIMING_PRINT(str, ...) printf("[%s:%d] " str,	\

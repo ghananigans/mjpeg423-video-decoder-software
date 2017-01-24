@@ -13,7 +13,7 @@
 
 void loadVideo (FAT_HANDLE hFat, char* filename);
 
-void playVideo (ece423_video_display* display, int *functionToStopPlayingFrames(void));
+void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames)(void));
 
 int fastForwardVideo (void);
 

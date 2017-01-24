@@ -7,6 +7,7 @@
 
 #include "mpeg423_decoder_ext.h"
 #include "../../utils.h"
+#include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
 
 #define ERROR_AND_EXIT(str) {		\
     DBG_PRINT("Error: %s\n", str);	\

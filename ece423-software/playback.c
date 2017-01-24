@@ -138,7 +138,7 @@ void previewVideo (ece423_video_display* display) {
 }
 
 // TODO: we need to make this timer based
-void playVideo (ece423_video_display* display, int *functionToStopPlayingFrames(void)) {
+void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames)(void)) {
 	DBG_PRINT("Playing the video\n");
 
 	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
@@ -172,7 +172,6 @@ bool isVideoPlaying (void) {
 
 int fastForwardVideo (void) {
 	int index;
-	int error;
 
 	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames left in the video!\n");
@@ -210,7 +209,6 @@ int fastForwardVideo (void) {
 
 void rewindVideo (void) {
 	int index;
-	int error;
 
 	if (playbackData.currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames from beginning of the video; go to start!\n");

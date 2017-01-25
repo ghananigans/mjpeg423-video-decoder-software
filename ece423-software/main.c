@@ -105,7 +105,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 		// push button presses
 		//
 		while (1) {
-			printf("Press Push Button 0 to play video\n");
+			DBG_PRINT("Press Push Button 0 to play video\n");
 
 			keyPressed = waitForButtonPress();
 			DBG_PRINT("Key pressed %d\n", keyPressed);
@@ -182,16 +182,17 @@ int main() {
 	FAT_HANDLE hFAT;
 	FAT_BROWSE_HANDLE FatBrowseHandle;
 	int retVal;
+
+#ifdef TIMING_TESTS
 	int timingCount;
 	uint32_t timingCounterVal;
 
-#ifdef TIMING_TESTS
 	for (timingCount = 10; timingCount != 0; --timingCount) {
 		retVal = alt_timestamp_start();
 		timingCounterVal = alt_timestamp();
 
 		assert(retVal == 0, "Retval not 0; Got %d\n", retVal);
-		TIMING_PRINT("Empty Timing Count Val #%d:%u\n", timingCount, timingCounterVal);
+		TIMING_PRINT("Empty Timing Count Val #%u\n", timingCounterVal);
 	}
 #endif // #ifdef TIMING_TESTS
 

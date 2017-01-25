@@ -8,10 +8,7 @@
 #ifndef UTILS_H_
 #define UTILS_H_
 
-//
-// Comment this out to disable timing reports
-//
-//#define TIMING_TESTS
+#include "config.h"
 
 #ifdef TIMING_TESTS
 #define TIMING_PRINT(str, ...) printf("[%s:%d] " str,	\
@@ -19,11 +16,6 @@
 #else
 #define TIMING_PRINT(str, ...) ((void) 0)
 #endif // #ifdef TIMING_TESTS
-
-//
-// Comment this out to remove print statements
-//
-#define DEBUG_PRINT_ENABLED
 
 //
 // DBG_PRINT used to print debug statements

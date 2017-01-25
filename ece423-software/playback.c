@@ -43,7 +43,7 @@ static void timerFunction (void) {
  *   Private playback api
  */
 
-static void playFrame (ece423_video_display* display, bool forcePeriodic) {
+static inline void playFrame (ece423_video_display* display, bool forcePeriodic) {
 	int retVal;
 	uint32_t* currentOutputBuffer;
 
@@ -64,7 +64,7 @@ static void playFrame (ece423_video_display* display, bool forcePeriodic) {
 
 	// Flip to next frame
 	if (forcePeriodic) {
-		assert(!switchFrame, "Frame rate too fast, decoding cant keep up!")
+		assert(!switchFrame, "Frame rate too fast, decoding can't keep up!")
 		while (!switchFrame){}  // wait for the frame timer to fire
 	}
 	ece423_video_display_switch_frames(display);
@@ -114,7 +114,6 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 	assert(retVal, "Failed to allocate frame buffer");
 }
 
-
 void previewVideo (ece423_video_display* display) {
 	//startPlaybackFrameTimer();
 
@@ -125,7 +124,6 @@ void previewVideo (ece423_video_display* display) {
 	//stopPlaybackFrameTimer();
 }
 
-// TODO: we need to make this timer based
 void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames)(void)) {
 	DBG_PRINT("Playing the video\n");
 
@@ -139,7 +137,7 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 
 	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames
 			&& functionToStopPlayingFrames() == 0) {
-		playFrame(display, 1);
+		playFrame(display, 0);
 	}
 
 	//
@@ -203,19 +201,19 @@ void rewindVideo (void) {
 		index = 0;
 	} else {
 		index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
-	}
 
-	while (--index >= 0) {
-		//
-		// Check if next possible iframe's frame index is atleast 108 frames
-		// from the current frame. 108 is the magic number because
-		// Iframes will occur ever 24 frames (at max), we just need to be
-		// 120 +- 12 frames. If there is an iframe at 108, then we can be sure
-		// there will be an iframe by 132. This means we will always get
-		// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
-		//
-		if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[index].frame_index >= 108) {
-			break;
+		while (--index >= 0) {
+			//
+			// Check if next possible iframe's frame index is atleast 108 frames
+			// from the current frame. 108 is the magic number because
+			// Iframes will occur ever 24 frames (at max), we just need to be
+			// 120 +- 12 frames. If there is an iframe at 108, then we can be sure
+			// there will be an iframe by 132. This means we will always get
+			// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
+			//
+			if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[index].frame_index >= 108) {
+				break;
+			}
 		}
 	}
 

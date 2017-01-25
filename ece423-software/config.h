@@ -20,7 +20,17 @@
 // The number of buffers to initialize the display with
 #define NUM_OUTPUT_BUFFERS	(2)
 
-#define FRAME_RATE_MS 		(500)
+#define FRAME_RATE_MS 		(750)
+
+//
+// Comment this out to disable timing reports
+//
+//#define TIMING_TESTS
+
+//
+// Comment this out to remove print statements
+//
+#define DEBUG_PRINT_ENABLED
 
 
 #endif /* CONFIG_H_ */

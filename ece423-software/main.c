@@ -28,7 +28,9 @@
 #include "key_controls.h"
 #include "libs/ece423_sd/ece423_sd.h"
 
+#ifdef TIMING_TESTS
 #include <sys/alt_timestamp.h>
+#endif // #ifdef TIMING_TESTS
 
 #define PLAY_PAUSE_VIDEO_BUTTON		(1)
 #define LOAD_NEXT_VIDEO_BUTTON		(2)
@@ -192,7 +194,7 @@ int main() {
 		timingCounterVal = alt_timestamp();
 
 		assert(retVal == 0, "Retval not 0; Got %d\n", retVal);
-		TIMING_PRINT("Empty Timing Count Val #%u\n", timingCounterVal);
+		TIMING_PRINT(" %d | Empty Timing Count Val | #%u \n", retVal, timingCounterVal);
 	}
 #endif // #ifdef TIMING_TESTS
 

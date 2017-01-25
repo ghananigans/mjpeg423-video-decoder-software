@@ -25,12 +25,23 @@
 //
 // Comment this out to disable timing reports
 //
-//#define TIMING_TESTS
+#define TIMING_TESTS
 
+#ifdef TIMING_TESTS
+#define TIMING_TEST_SD_READ
+#define TIMING_TEST_LOSSLESS_Y
+#define TIMING_TEST_LOSSLESS_CB
+#define TIMING_TEST_LOSSLESS_CR
+#define TIMING_TEST_IDCT_ONE_FRAME
+//#define TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+//#define TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
+#define TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
+//#define TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
+#endif // #ifdef TIMING_TESTS
 //
 // Comment this out to remove print statements
 //
-#define DEBUG_PRINT_ENABLED
+//#define DEBUG_PRINT_ENABLED
 
 
 #endif /* CONFIG_H_ */

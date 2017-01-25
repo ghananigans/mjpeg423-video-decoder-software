@@ -6,8 +6,13 @@
  */
 
 #include "mpeg423_decoder_ext.h"
+#include "../../config.h"
 #include "../../utils.h"
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
+
+#ifdef TIMING_TESTS
+#include <sys/alt_timestamp.h>
+#endif // #ifdef TIMING_TESTS
 
 #define ERROR_AND_EXIT(str) {		\
     DBG_PRINT("Error: %s\n", str);	\
@@ -144,6 +149,11 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
     int hYb_size = mpegHeader->h_size/8;           //number of luminance blocks. Same as chrominance in the sample app
     int wYb_size = mpegHeader->w_size/8;
 
+#ifdef TIMING_TESTS
+	uint32_t timingCounterVal;
+	int timingRetVal;
+#endif // #ifdef TIMING_TESTS
+
 	//read frame payload
 	if (!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) {
 		ERROR_AND_EXIT("cannot read input file");
@@ -157,7 +167,16 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	DBG_PRINT("    MPG Frame size: %d: \n", frame_size);
 	DBG_PRINT("    MPG Frame type: 0x%x: \n", frame_type);
 
+#ifdef TIMING_TEST_SD_READ
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_SD_READ
+
 	bool read = Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t));
+
+#ifdef TIMING_TEST_SD_READ
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | SD Read | %s-Type | %u \n", timingRetVal, frame_type ? "P" : "I", timingCounterVal);
+#endif // #ifdef TIMING_TEST_SD_READ
 
 	if (!read) {
 		ERROR_AND_EXIT("cannot read input file");
@@ -168,14 +187,106 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	mpegFrameBuffer->Crbitstream = mpegFrameBuffer->Cbbitstream + Cbsize;
 
 	//lossless decoding
+#ifdef TIMING_TEST_LOSSLESS_Y
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_LOSSLESS_Y
+
 	lossless_decode(hYb_size*wYb_size, mpegFrameBuffer->Ybitstream, mpegFrameBuffer->YDCAC, Yquant, frame_type);
+
+#ifdef TIMING_TEST_LOSSLESS_Y
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | lossless | Y | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifdef TIMING_TEST_LOSSLESS_Y
+
+
+#ifdef TIMING_TEST_LOSSLESS_CB
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_LOSSLESS_CB
+
 	lossless_decode(hCb_size*wCb_size, mpegFrameBuffer->Cbbitstream, mpegFrameBuffer->CbDCAC, Cquant, frame_type);
+
+#ifdef TIMING_TEST_LOSSLESS_CB
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | lossless | Cb | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifdef TIMING_TEST_LOSSLESS_CB
+
+#ifdef TIMING_TEST_LOSSLESS_CR
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_LOSSLESS_CR
+
 	lossless_decode(hCb_size*wCb_size, mpegFrameBuffer->Crbitstream, mpegFrameBuffer->CrDCAC, Cquant, frame_type);
 
+#ifdef TIMING_TEST_LOSSLESS_CR
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | lossless | Cr | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifdef TIMING_TESTS
+
 	//fdct
-	for(int b = 0; b < hYb_size*wYb_size; b++) idct(mpegFrameBuffer->YDCAC[b], mpegFrameBuffer->Yblock[b]);
-	for(int b = 0; b < hCb_size*wCb_size; b++) idct(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->Cbblock[b]);
-	for(int b = 0; b < hCb_size*wCb_size; b++) idct(mpegFrameBuffer->CrDCAC[b], mpegFrameBuffer->Crblock[b]);
+#ifdef TIMING_TEST_IDCT_ONE_FRAME
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
+
+	for(int b = 0; b < hYb_size*wYb_size; b++) {
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingRetVal = alt_timestamp_start();
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+		idct(mpegFrameBuffer->YDCAC[b], mpegFrameBuffer->Yblock[b]);
+
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingCounterVal = alt_timestamp();
+		TIMING_PRINT(" %d | idct one colour component | Y | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+	}
+
+	for(int b = 0; b < hCb_size*wCb_size; b++) {
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingRetVal = alt_timestamp_start();
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+		idct(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->Cbblock[b]);
+
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingCounterVal = alt_timestamp();
+		TIMING_PRINT(" %d | idct one colour component | Cb | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+	}
+
+	for(int b = 0; b < hCb_size*wCb_size; b++) {
+
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingRetVal = alt_timestamp_start();
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+		idct(mpegFrameBuffer->CrDCAC[b], mpegFrameBuffer->Crblock[b]);
+
+#ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+#ifndef TIMING_TEST_IDCT_ONE_FRAME
+		timingCounterVal = alt_timestamp();
+		TIMING_PRINT(" %d | idct one colour component | Cr | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
+#endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+	}
+
+#ifdef TIMING_TEST_IDCT_ONE_FRAME
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | idct one frame | | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
+
+#ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
+	timingRetVal = alt_timestamp_start();
+#endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
 	//ybcbr to rgb conversion
 	for (int h = 0; h < hCb_size; h++){
@@ -185,6 +296,12 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 					mpegFrameBuffer->Cbblock[b], mpegFrameBuffer->Crblock[b], outputBuffer);
 		}
 	}
+
+#ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
+	timingCounterVal = alt_timestamp();
+	TIMING_PRINT(" %d | YCBCR to RGB One Frame | | %u \n", timingRetVal, timingCounterVal);
+#endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
+
 
 	return 1;
 }

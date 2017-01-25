@@ -20,7 +20,7 @@
 // The number of buffers to initialize the display with
 #define NUM_OUTPUT_BUFFERS	(2)
 
-#define FRAME_RATE_MS 		(750)
+#define FRAME_RATE_MS 		(500)
 
 
 #endif /* CONFIG_H_ */

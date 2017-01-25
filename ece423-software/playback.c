@@ -13,6 +13,7 @@
 #include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
 #include "system.h"
 #include "sys/alt_alarm.h"
+#include "timer.h"
 
 #define MAX_IFRAME_OFFSET (24)
 
@@ -34,21 +35,8 @@ static PLAYBACK_DATA playbackData;
  *   Timer control for controlling the frame rate
  */
 
-static alt_alarm frameTimer;
-
-static inline alt_u32 frameTimerCallback (void* context) {
+static void timerFunction (void) {
 	switchFrame = true;
-	return FRAME_RATE_MS;
-}
-
-static inline int startPlaybackFrameTimer (void) {
-	switchFrame = false;
-	return alt_alarm_start(&frameTimer, FRAME_RATE_MS, frameTimerCallback, NULL);
-}
-
-static inline void stopPlaybackFrameTimer (void) {
-	alt_alarm_stop(&frameTimer);
-	switchFrame = false;
 }
 
 /*
@@ -147,7 +135,7 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 		return;
 	}
 
-	startPlaybackFrameTimer();
+	startTimer();
 
 	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames
 			&& functionToStopPlayingFrames() == 0) {
@@ -163,7 +151,7 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 	//
 	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
 
-	stopPlaybackFrameTimer();
+stopTimer();
 }
 
 bool isVideoPlaying (void) {
@@ -251,4 +239,6 @@ void closeVideo (void) {
 	unload_mpeg_trailer(&playbackData.mpegTrailer);
 }
 
-
+int initPlayback (void) {
+	return initTimer(FRAME_RATE_MS, &timerFunction);
+}

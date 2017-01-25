@@ -27,4 +27,6 @@ void pauseVideo (void);
 
 void closeVideo (void);
 
+int initPlayback (void);
+
 #endif /* PLAYBACK_H_ */

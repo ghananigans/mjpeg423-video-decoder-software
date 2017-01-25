@@ -170,6 +170,7 @@ C_SRCS += libs/mjpeg423/sample_main.c
 C_SRCS += lib_exts/mpeg423/mpeg423_decoder_ext.c
 C_SRCS += playback.c
 C_SRCS += key_controls.c
+C_SRCS += timer.c
 CXX_SRCS :=
 ASM_SRCS :=
 

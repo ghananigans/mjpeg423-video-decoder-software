@@ -226,6 +226,12 @@ int main() {
 	retVal = initKeyIrq();
 	assert(retVal, "Failed to init keys");
 
+	//
+	// Init playback
+	//
+	retVal = initPlayback();
+	assert(retVal, "Failed to init playback");
+
 	DBG_PRINT("Initialization complete!\n");
 
 	doWork(hFAT, &FatBrowseHandle, display);

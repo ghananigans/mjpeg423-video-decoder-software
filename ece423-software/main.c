@@ -29,7 +29,7 @@
 #include "libs/ece423_sd/ece423_sd.h"
 
 #ifdef TIMING_TESTS
-#include <sys/alt_timestamp.h>
+#include "profile.h"
 #endif // #ifdef TIMING_TESTS
 
 #define PLAY_PAUSE_VIDEO_BUTTON		(1)
@@ -186,17 +186,23 @@ int main() {
 	int retVal;
 
 #ifdef TIMING_TESTS
+	//
+	// init Profiling stuff
+	//
+	initProfileTime();
+#endif
+
+#ifdef TIMING_TEST_EMPTY
 	int timingCount;
-	uint32_t timingCounterVal;
 
 	for (timingCount = 10; timingCount != 0; --timingCount) {
-		retVal = alt_timestamp_start();
-		timingCounterVal = alt_timestamp();
-
-		assert(retVal == 0, "Retval not 0; Got %d\n", retVal);
-		TIMING_PRINT(" %d | Empty Timing Count Val | #%u \n", retVal, timingCounterVal);
+		PROFILE_TIME_START(TIMING_TEST_EMPTY);
+		PROFILE_TIME_END(TIMING_TEST_EMPTY);
 	}
-#endif // #ifdef TIMING_TESTS
+
+	PROFILE_TIME_PRINT(TIMING_TEST_EMPTY);
+
+#endif // #ifdef TIMING_TEST_EMPTY
 
 	//
 	// Init the SD

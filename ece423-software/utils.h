@@ -10,6 +10,9 @@
 
 #include "config.h"
 
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+
 #ifdef TIMING_TESTS
 #define TIMING_PRINT(str, ...) printf("[%s:%d] " str,	\
 				__FUNCTION__, __LINE__, ##__VA_ARGS__);

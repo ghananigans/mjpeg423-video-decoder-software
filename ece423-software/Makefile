@@ -171,6 +171,7 @@ C_SRCS += lib_exts/mpeg423/mpeg423_decoder_ext.c
 C_SRCS += playback.c
 C_SRCS += key_controls.c
 C_SRCS += timer.c
+C_SRCS += profile.c
 CXX_SRCS :=
 ASM_SRCS :=
 

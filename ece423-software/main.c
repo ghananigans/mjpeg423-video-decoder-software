@@ -189,7 +189,8 @@ int main() {
 	//
 	// init Profiling stuff
 	//
-	initProfileTime();
+	retVal = initProfileTime();
+	assert(retVal == 0, "Profile init failed!");
 #endif
 
 #ifdef TIMING_TEST_EMPTY

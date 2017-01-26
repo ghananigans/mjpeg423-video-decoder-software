@@ -42,16 +42,19 @@ extern int profile_time_retVal;
 		assert(profile_time_flag == 0, 								\
 				"Something has already started to be profiled: %d",	\
 				profile_time_flag);									\
-		profile_time_flag = (0x1 << (test));						\
+		profile_time_flag = (test);									\
 		profile_time_retVal = alt_timestamp_start();				\
 	}
 
 #define PROFILE_TIME_END(test)										\
 	{																\
 		profile_time_temp = alt_timestamp();						\
-		assert(profile_time_flag == (0x1 << (test)), 				\
+		assert(profile_time_flag == (test), 						\
 				"Different profile is started: %d",					\
 				profile_time_flag);									\
+		assert(profile_time_retVal == 0,							\
+				"alt_timestamp_start failed! %d %d\n",				\
+				profile_time_flag, profile_time_retVal);			\
 		profile_time_flag = 0;										\
 		profile_time_ticks[(test)] += profile_time_temp;			\
 		profile_time_count[(test)] += 1;							\
@@ -74,4 +77,4 @@ extern int profile_time_retVal;
 	}
 
 
-void initProfileTime (void);
+int initProfileTime (void);

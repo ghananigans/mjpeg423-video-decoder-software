@@ -171,6 +171,14 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 			playVideo(display, &buttonHasBeenPressed); // Can stop because video ended OR
 
 			DBG_PRINT("Video stopped\n");
+
+#ifdef TIMING_TESTS
+			for (int i = 0; i < 10; ++i) {
+				for (int k = 0; k < 2; ++k) {
+					PROFILE_TIME_PRINT(i, k);
+				}
+			}
+#endif
 		}
 
 		closeVideo();
@@ -197,11 +205,11 @@ int main() {
 	int timingCount;
 
 	for (timingCount = 10; timingCount != 0; --timingCount) {
-		PROFILE_TIME_START(TIMING_TEST_EMPTY);
-		PROFILE_TIME_END(TIMING_TEST_EMPTY);
+		PROFILE_TIME_START(TIMING_TEST_EMPTY, 0);
+		PROFILE_TIME_END(TIMING_TEST_EMPTY, 0);
 	}
 
-	PROFILE_TIME_PRINT(TIMING_TEST_EMPTY);
+	PROFILE_TIME_PRINT(TIMING_TEST_EMPTY, 0);
 
 #endif // #ifdef TIMING_TEST_EMPTY
 

@@ -13,16 +13,16 @@
 #include <stdint.h>
 #include "utils.h"
 
+#define NUM_TIMING_TESTS							(10)
+
 extern uint16_t profile_time_flag;
-extern uint64_t profile_time_ticks[10];
-extern uint64_t profile_time_count[10];
-extern uint64_t profile_time_max[10];
-extern uint64_t profile_time_min[10];
+extern uint64_t profile_time_ticks[NUM_TIMING_TESTS][2];
+extern uint64_t profile_time_count[NUM_TIMING_TESTS][2];
+extern uint64_t profile_time_max[NUM_TIMING_TESTS][2];
+extern uint64_t profile_time_min[NUM_TIMING_TESTS][2];
 extern uint64_t profile_time_temp;
 
 extern int profile_time_retVal;
-
-#define NUM_TIMING_TESTS							(10)
 
 #ifdef TIMING_TESTS
 #define TIMING_TEST_EMPTY							(0)
@@ -37,44 +37,34 @@ extern int profile_time_retVal;
 //#define TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK		(9)
 #endif // #ifdef TIMING_TESTS
 
-#define PROFILE_TIME_START(test)									\
+#define PROFILE_TIME_START(test, flag)								\
 	{																\
-		assert(profile_time_flag == 0, 								\
-				"Something has already started to be profiled: %d",	\
-				profile_time_flag);									\
 		profile_time_flag = (test);									\
 		profile_time_retVal = alt_timestamp_start();				\
 	}
 
-#define PROFILE_TIME_END(test)										\
+#define PROFILE_TIME_END(test, flag)								\
 	{																\
 		profile_time_temp = alt_timestamp();						\
-		assert(profile_time_flag == (test), 						\
-				"Different profile is started: %d",					\
-				profile_time_flag);									\
-		assert(profile_time_retVal == 0,							\
-				"alt_timestamp_start failed! %d %d\n",				\
-				profile_time_flag, profile_time_retVal);			\
 		profile_time_flag = 0;										\
-		profile_time_ticks[(test)] += profile_time_temp;			\
-		profile_time_count[(test)] += 1;							\
-		profile_time_max[(test)] = MAX(profile_time_max[(test)],	\
+		profile_time_ticks[(test)][(flag)] += profile_time_temp;	\
+		profile_time_count[(test)][(flag)] += 1;					\
+		profile_time_max[(test)][(flag)] = MAX(profile_time_max[(test)][(flag)],	\
 		profile_time_temp);											\
-		profile_time_min[(test)] = MIN(profile_time_min[(test)],	\
+		profile_time_min[(test)][(flag)] = MIN(profile_time_min[(test)][(flag)],	\
 		profile_time_temp);											\
-		TIMING_PRINT("TICKS: %d\n", profile_time_temp);				\
+	}
+
+#define PROFILE_TIME_PRINT(test, flag)										\
+	{																	\
+		TIMING_PRINT("Test %d with Flag %d\n", (test), (flag));								\
+		TIMING_PRINT("    Ticks: %lu\n", profile_time_ticks[(test)][(flag)]); 	\
+		TIMING_PRINT("    Count: %lu\n", profile_time_count[(test)][(flag)]);	\
+		TIMING_PRINT("    Max : %lu\n", profile_time_max[(test)][(flag)]);		\
+		TIMING_PRINT("    Min : %lu\n", profile_time_min[(test)][(flag)]);		\
 	}
 
 #endif /* PROFILE_H_ */
-
-#define PROFILE_TIME_PRINT(test)										\
-	{																	\
-		TIMING_PRINT("Test %d:\n", (test));								\
-		TIMING_PRINT("    Ticks: %d\n", profile_time_ticks[(test)]); 	\
-		TIMING_PRINT("    Count: %d\n", profile_time_count[(test)]);	\
-		TIMING_PRINT("    Max : %d\n", profile_time_max[(test)]);		\
-		TIMING_PRINT("    Min : %d\n", profile_time_min[(test)]);		\
-	}
 
 
 int initProfileTime (void);

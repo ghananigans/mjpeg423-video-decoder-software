@@ -11,7 +11,7 @@
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
 
 #ifdef TIMING_TESTS
-#include <sys/alt_timestamp.h>
+#include "../../profile.h"
 #endif // #ifdef TIMING_TESTS
 
 #define ERROR_AND_EXIT(str) {		\
@@ -149,11 +149,6 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
     int hYb_size = mpegHeader->h_size/8;           //number of luminance blocks. Same as chrominance in the sample app
     int wYb_size = mpegHeader->w_size/8;
 
-#ifdef TIMING_TESTS
-	uint32_t timingCounterVal;
-	int timingRetVal;
-#endif // #ifdef TIMING_TESTS
-
 	//read frame payload
 	if (!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) {
 		ERROR_AND_EXIT("cannot read input file");
@@ -168,14 +163,13 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	DBG_PRINT("    MPG Frame type: 0x%x: \n", frame_type);
 
 #ifdef TIMING_TEST_SD_READ
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_SD_READ, frame_type);
 #endif // #ifdef TIMING_TEST_SD_READ
 
 	bool read = Fat_FileRead(hFile, mpegFrameBuffer->Ybitstream, frame_size - 4 * sizeof(uint32_t));
 
 #ifdef TIMING_TEST_SD_READ
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | SD Read | %s-Type | %u \n", timingRetVal, frame_type ? "P" : "I", timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_SD_READ, frame_type);
 #endif // #ifdef TIMING_TEST_SD_READ
 
 	if (!read) {
@@ -188,48 +182,45 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 	//lossless decoding
 #ifdef TIMING_TEST_LOSSLESS_Y
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_LOSSLESS_Y, frame_type);
 #endif // #ifdef TIMING_TEST_LOSSLESS_Y
 
 	lossless_decode(hYb_size*wYb_size, mpegFrameBuffer->Ybitstream, mpegFrameBuffer->YDCAC, Yquant, frame_type);
 
 #ifdef TIMING_TEST_LOSSLESS_Y
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | lossless | Y | %u \n", timingRetVal, timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_LOSSLESS_Y, frame_type);
 #endif // #ifdef TIMING_TEST_LOSSLESS_Y
 
 
 #ifdef TIMING_TEST_LOSSLESS_CB
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_LOSSLESS_CB, frame_type);
 #endif // #ifdef TIMING_TEST_LOSSLESS_CB
 
 	lossless_decode(hCb_size*wCb_size, mpegFrameBuffer->Cbbitstream, mpegFrameBuffer->CbDCAC, Cquant, frame_type);
 
 #ifdef TIMING_TEST_LOSSLESS_CB
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | lossless | Cb | %u \n", timingRetVal, timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_LOSSLESS_CB, frame_type);
 #endif // #ifdef TIMING_TEST_LOSSLESS_CB
 
 #ifdef TIMING_TEST_LOSSLESS_CR
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_LOSSLESS_CR, frame_type);
 #endif // #ifdef TIMING_TEST_LOSSLESS_CR
 
 	lossless_decode(hCb_size*wCb_size, mpegFrameBuffer->Crbitstream, mpegFrameBuffer->CrDCAC, Cquant, frame_type);
 
 #ifdef TIMING_TEST_LOSSLESS_CR
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | lossless | Cr | %u \n", timingRetVal, timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_LOSSLESS_CR, frame_type);
 #endif // #ifdef TIMING_TESTS
 
 	//fdct
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_FRAME, frame_type);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
 
 	for(int b = 0; b < hYb_size*wYb_size; b++) {
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingRetVal = alt_timestamp_start();
+		PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
@@ -237,8 +228,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingCounterVal = alt_timestamp();
-		TIMING_PRINT(" %d | idct one colour component | Y | %u \n", timingRetVal, timingCounterVal);
+		PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
@@ -247,7 +237,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingRetVal = alt_timestamp_start();
+		PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
@@ -255,8 +245,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingCounterVal = alt_timestamp();
-		TIMING_PRINT(" %d | idct one colour component | Cb | %u \n", timingRetVal, timingCounterVal);
+		PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 	}
@@ -265,7 +254,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingRetVal = alt_timestamp_start();
+		PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
@@ -273,19 +262,17 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-		timingCounterVal = alt_timestamp();
-		TIMING_PRINT(" %d | idct one colour component | Cr | %u \n", timingRetVal, timingCounterVal);
+		PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, frame_type);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 	}
 
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | idct one frame | | %u \n", timingRetVal, timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_FRAME, frame_type);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
 
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-	timingRetVal = alt_timestamp_start();
+	PROFILE_TIME_START(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, frame_type);
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
 	//ybcbr to rgb conversion
@@ -298,8 +285,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	}
 
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | YCBCR to RGB One Frame | | %u \n", timingRetVal, timingCounterVal);
+	PROFILE_TIME_END(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, frame_type);
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
 

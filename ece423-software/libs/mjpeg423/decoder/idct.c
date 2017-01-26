@@ -14,7 +14,7 @@
 #include "../../../utils.h"
 
 #ifdef TIMING_TESTS
-#include <sys/alt_timestamp.h>
+#include "../../../profile.h"
 #endif // #ifdef TIMING_TESTS
 
 #ifndef NULL_DCT
@@ -35,11 +35,6 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
     int ctr;
     int32_t workspace[DCTSIZE*DCTSIZE];	/* buffers data between passes */
     SHIFT_TEMPS
-    
-#ifdef TIMING_TESTS
-	uint32_t timingCounterVal;
-	int timingRetVal;
-#endif // #ifdef TIMING_TESTS
 
     /* Pass 1: process columns from input, store into work array. */
     /* Note results are scaled up by sqrt(8) compared to a true IDCT; */
@@ -48,12 +43,11 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-	timingRetVal = alt_timestamp_start();
+    PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_8_X_8_BLOCK, 0);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
-	timingRetVal = alt_timestamp_start();
     inptr = DCAC[0];
     wsptr = workspace;
     for (ctr = DCTSIZE; ctr > 0; ctr--) {
@@ -200,8 +194,7 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
-    timingCounterVal = alt_timestamp();
-    TIMING_PRINT(" %d | idct one 8x8 block | | %u \n", timingRetVal, timingCounterVal);
+    PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_8_X_8_BLOCK, 0);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK

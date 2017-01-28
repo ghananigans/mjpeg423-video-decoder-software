@@ -137,7 +137,7 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 
 	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames
 			&& functionToStopPlayingFrames() == 0) {
-		playFrame(display, 0);
+		playFrame(display, FORCE_PERIODIC);
 	}
 
 	//

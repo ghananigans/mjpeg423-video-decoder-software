@@ -22,10 +22,13 @@
 
 #define FRAME_RATE_MS 		(750)
 
+#define FORCE_PERIODIC      (0)
+
 //
 // Comment this out to disable timing reports
 //
-#define TIMING_TESTS
+//#define TIMING_TESTS
+//#define SIZE_TESTS
 
 //
 // Comment this out to remove print statements

@@ -55,13 +55,6 @@ void ycbcr_to_rgb(int h, int w, uint32_t w_size, pcolor_block_t Y, pcolor_block_
 {
     int index;
 
-#ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
-#ifndef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-	uint32_t timingCounterVal;
-    int timingRetVal = alt_timestamp_start();
-#endif // #ifndef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-#endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
-
     for (int y = 0; y < 8; y++){
         index = (h+y) * w_size + w;
         for(int x = 0; x < 8; x++){
@@ -74,13 +67,6 @@ void ycbcr_to_rgb(int h, int w, uint32_t w_size, pcolor_block_t Y, pcolor_block_
             index++;
         }
     }
-
-#ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
-#ifndef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-	timingCounterVal = alt_timestamp();
-	TIMING_PRINT(" %d | YCBCR to RGB One Frame | | %u \n", timingRetVal, timingCounterVal);
-#endif // #ifndef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
-#endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
 }
 
 #endif

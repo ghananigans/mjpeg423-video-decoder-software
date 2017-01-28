@@ -13,10 +13,6 @@
 #include "../../../config.h"
 #include "../../../utils.h"
 
-#ifdef TIMING_TESTS
-#include "../../../profile.h"
-#endif // #ifdef TIMING_TESTS
-
 #ifndef NULL_DCT
 
 /* normalize the result between 0 and 255 */
@@ -39,14 +35,6 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
     /* Pass 1: process columns from input, store into work array. */
     /* Note results are scaled up by sqrt(8) compared to a true IDCT; */
     /* furthermore, we scale the results by 2**PASS1_BITS. */
-
-#ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
-#ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
-#ifndef TIMING_TEST_IDCT_ONE_FRAME
-    PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_8_X_8_BLOCK, 0);
-#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
-#endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
-#endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
     inptr = DCAC[0];
     wsptr = workspace;
@@ -190,14 +178,6 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
         
         wsptr += DCTSIZE;		/* advance pointer to next row */
     }
-
-#ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
-#ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
-#ifndef TIMING_TEST_IDCT_ONE_FRAME
-    PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_8_X_8_BLOCK, 0);
-#endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
-#endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
-#endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 }
 
 #else /* Null implementation */

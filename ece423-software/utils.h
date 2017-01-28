@@ -15,7 +15,7 @@
 
 #ifdef TIMING_TESTS
 #define TIMING_PRINT(str, ...) printf("[%s:%d] " str,	\
-				__FUNCTION__, __LINE__, ##__VA_ARGS__);
+				__FUNCTION__, __LINE__, ##__VA_ARGS__)
 #else
 #define TIMING_PRINT(str, ...) ((void) 0)
 #endif // #ifdef TIMING_TESTS
@@ -27,7 +27,7 @@
 //
 #ifdef DEBUG_PRINT_ENABLED
 #define DBG_PRINT(str, ...)	printf("[%s:%d] " str, 		\
-				__FUNCTION__, __LINE__, ##__VA_ARGS__);
+				__FUNCTION__, __LINE__, ##__VA_ARGS__)
 #else
 #define DBG_PRINT(str, ...) ((void) 0)
 #endif // #ifdef DEBUG_PRINT_ENABLED

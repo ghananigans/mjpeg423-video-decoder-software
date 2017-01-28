@@ -97,6 +97,14 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 		DBG_PRINT("Loading video...\n");
 		loadVideo(hFAT, Fat_GetFileName(&fileContext));
 
+#ifdef TIMING_TESTS
+		//
+		// init Profiling stuff
+		//
+		retVal = initProfile();
+		assert(retVal == 0, "Profile init failed!");
+#endif
+
 		//
 		// Preview the video
 		//
@@ -173,9 +181,17 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 			DBG_PRINT("Video stopped\n");
 
 #ifdef TIMING_TESTS
-			for (int i = 0; i < 10; ++i) {
+			for (int i = 0; i < NUM_TIMING_TESTS; ++i) {
 				for (int k = 0; k < 2; ++k) {
 					PROFILE_TIME_PRINT(i, k);
+				}
+			}
+#endif
+
+#ifdef SIZE_TESTS
+			for (int i = 0; i < NUM_SIZE_TESTS; ++i) {
+				for (int k = 0; k < 2; ++k) {
+					PROFILE_SIZE_PRINT(i, k);
 				}
 			}
 #endif
@@ -197,7 +213,7 @@ int main() {
 	//
 	// init Profiling stuff
 	//
-	retVal = initProfileTime();
+	retVal = initProfile();
 	assert(retVal == 0, "Profile init failed!");
 #endif
 

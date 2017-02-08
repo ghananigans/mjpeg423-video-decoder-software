@@ -172,6 +172,7 @@ C_SRCS += playback.c
 C_SRCS += key_controls.c
 C_SRCS += timer.c
 C_SRCS += profile.c
+C_SRCS += idct_accel.c
 CXX_SRCS :=
 ASM_SRCS :=
 
@@ -206,7 +207,7 @@ CRT0 :=
 SYS_LIB :=
 
 # Define path to the root of the BSP.
-BSP_ROOT_DIR := C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\ece423-bsp
+BSP_ROOT_DIR := ..\ece423-bsp
 
 # List of application specific include directories, library directories and library names
 APP_INCLUDE_DIRS :=

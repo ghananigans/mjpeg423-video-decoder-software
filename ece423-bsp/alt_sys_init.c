@@ -2,9 +2,9 @@
  * alt_sys_init.c - HAL initialization source
  *
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
- * SOPC Builder design path: ../../ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
+ * SOPC Builder design path: ../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Wed Jan 18 20:28:35 EST 2017
+ * Generated: Tue Feb 07 20:48:23 EST 2017
  */
 
 /*
@@ -73,6 +73,8 @@ ALTERA_AVALON_JTAG_UART_INSTANCE ( JTAG_UART, jtag_uart);
 ALTERA_AVALON_SYSID_QSYS_INSTANCE ( SYSID, sysid);
 ALTERA_AVALON_TIMER_INSTANCE ( TIMER_0, timer_0);
 ALTERA_AVALON_TIMER_INSTANCE ( TIMER_1, timer_1);
+ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_FROM_IDCT_ACCEL, MDMA_FROM_IDCT_ACCEL_CSR, MDMA_FROM_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_from_idct_accel);
+ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_IDCT_ACCEL, MDMA_TO_IDCT_ACCEL_CSR, MDMA_TO_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_to_idct_accel);
 ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( VIDEO_DMA, VIDEO_DMA_CSR, VIDEO_DMA_DESCRIPTOR_SLAVE, video_dma);
 
 /*
@@ -100,5 +102,7 @@ void alt_sys_init( void )
     ALTERA_AVALON_TIMER_INIT ( TIMER_1, timer_1);
     ALTERA_AVALON_JTAG_UART_INIT ( JTAG_UART, jtag_uart);
     ALTERA_AVALON_SYSID_QSYS_INIT ( SYSID, sysid);
+    ALTERA_MSGDMA_INIT ( MDMA_FROM_IDCT_ACCEL, mdma_from_idct_accel);
+    ALTERA_MSGDMA_INIT ( MDMA_TO_IDCT_ACCEL, mdma_to_idct_accel);
     ALTERA_MSGDMA_INIT ( VIDEO_DMA, video_dma);
 }

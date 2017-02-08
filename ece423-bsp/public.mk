@@ -86,11 +86,11 @@ ACDS_VERSION := 15.1
 
 # Quartus Generated JDI File. Required for resolving node instance ID's with 
 # design component names. 
-JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ece423_prefab_w2017/ece423_prefab/ECE423_C5G.jdi
+JDI_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ECE423_C5G.jdi
 
 # Qsys--generated SOPCINFO file. Required for resolving node instance ID's with 
 # design component names. 
-SOPCINFO_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ece423_prefab_w2017/ece423_prefab/ECE423_QSYS.sopcinfo
+SOPCINFO_FILE := $(ABS_BSP_ROOT_DIR)/../../ece423/ECE423_QSYS.sopcinfo
 
 # Big-Endian operation. 
 # setting BIG_ENDIAN is false
@@ -156,14 +156,14 @@ SOPC_SYSID_FLAG += --id=0
 ELF_PATCH_FLAG  += --id 0
 
 # The SOPC System ID Base Address 
-# setting SOPC_SYSID_BASE_ADDRESS is 0x20101500
-SOPC_SYSID_FLAG += --sidp=0x20101500
-ELF_PATCH_FLAG  += --sidp 0x20101500
+# setting SOPC_SYSID_BASE_ADDRESS is 0x20101560
+SOPC_SYSID_FLAG += --sidp=0x20101560
+ELF_PATCH_FLAG  += --sidp 0x20101560
 
 # The SOPC Timestamp 
-# setting SOPC_TIMESTAMP is 1484703146
-SOPC_SYSID_FLAG += --timestamp=1484703146
-ELF_PATCH_FLAG  += --timestamp 1484703146
+# setting SOPC_TIMESTAMP is 1486517606
+SOPC_SYSID_FLAG += --timestamp=1486517606
+ELF_PATCH_FLAG  += --timestamp 1486517606
 
 # Enable JTAG UART driver to recover when host is inactive causing buffer to 
 # full without returning error. Printf will not fail with this recovery. none 

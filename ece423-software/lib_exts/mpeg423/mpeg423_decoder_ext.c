@@ -9,6 +9,7 @@
 #include "../../config.h"
 #include "../../utils.h"
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
+#include "../../idct_accel.h"
 
 #ifdef TIMING_TESTS
 #include "../../profile.h"
@@ -247,7 +248,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
-
+		idct_accel_calculate_buffer(mpegFrameBuffer->YDCAC[b], mpegFrameBuffer->YDCAC[b], sizeof(mpegFrameBuffer->YDCAC[b]));
 		idct(mpegFrameBuffer->YDCAC[b], mpegFrameBuffer->Yblock[b]);
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -281,6 +282,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
+		idct_accel_calculate_buffer(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->CbDCAC[b], sizeof(mpegFrameBuffer->CbDCAC[b]));
 		idct(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->Cbblock[b]);
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -314,6 +316,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
+		idct_accel_calculate_buffer(mpegFrameBuffer->CrDCAC[b], mpegFrameBuffer->CrDCAC[b], sizeof(mpegFrameBuffer->CrDCAC[b]));
 		idct(mpegFrameBuffer->CrDCAC[b], mpegFrameBuffer->Crblock[b]);
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK

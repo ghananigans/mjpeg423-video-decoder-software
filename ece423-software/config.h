@@ -12,6 +12,11 @@
 // without this the colours look weird :/ not sure why
 #define NULL_COLORCONV
 
+//
+// use this to turn off software IDCT
+//
+#define NULL_DCT
+
 // The size of the display
 // TODO: since this is a fixed size we could probably statically allocate the working buffers
 #define DISPLAY_WIDTH 		(640)
@@ -33,7 +38,7 @@
 //
 // Comment this out to remove print statements
 //
-//#define DEBUG_PRINT_ENABLED
+#define DEBUG_PRINT_ENABLED
 
 
 #endif /* CONFIG_H_ */

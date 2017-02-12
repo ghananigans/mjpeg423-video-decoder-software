@@ -26,6 +26,8 @@
 
 #include "playback.h"
 #include "key_controls.h"
+#include "idct_accel.h"
+
 #include "libs/ece423_sd/ece423_sd.h"
 
 #ifdef TIMING_TESTS
@@ -259,6 +261,12 @@ int main() {
 	//
 	retVal = initKeyIrq();
 	assert(retVal, "Failed to init keys");
+
+	//
+	// Init IDCT accel
+	//
+	retVal = init_idct_accel();
+	assert(retVal, "Failed to init idct accel!\n");
 
 	//
 	// Init playback

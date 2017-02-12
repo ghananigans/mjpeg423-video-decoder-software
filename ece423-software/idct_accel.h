@@ -8,8 +8,9 @@
 #ifndef IDCT_ACCEL_H_
 #define IDCT_ACCEL_H_
 
+#include <stdint.h>
 
-void init_idct_accel();
-
+int init_idct_accel (void);
+void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfBuffers);
 
 #endif /* IDCT_ACCEL_H_ */

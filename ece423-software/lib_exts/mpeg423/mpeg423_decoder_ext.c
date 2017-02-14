@@ -283,7 +283,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
-		idct_accel_calculate_buffer(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->CbDCAC[b], 2 + sizeof(mpegFrameBuffer->CbDCAC[b]));
+		idct_accel_calculate_buffer(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->CbDCAC[b], sizeof(mpegFrameBuffer->CbDCAC[b]));
 		idct(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->Cbblock[b]);
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK

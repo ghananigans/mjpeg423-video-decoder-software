@@ -72,39 +72,37 @@ int init_idct_accel (void){
 void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfBuffers){
 	int retVal;
 
+	//
+	// Flush input buffer cache
+	//
+	alt_dcache_flush(inputBuffer, sizeOfBuffers);
+
 	retVal = alt_msgdma_construct_standard_mm_to_st_descriptor(to_accel.dev,
-					&to_accel.desc,(alt_u32 *)inputBuffer, 127, 0);
+					&to_accel.desc,(alt_u32 *)inputBuffer, sizeOfBuffers, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
 
 	retVal = alt_msgdma_construct_standard_st_to_mm_descriptor(from_accel.dev,
-					&from_accel.desc,(alt_u32 *)outputBuffer, 127, 0);
+					&from_accel.desc,(alt_u32 *)outputBuffer, sizeOfBuffers, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
 
-	printf("Attempting DMA transfer...\n");
-
-	retVal = alt_msgdma_standard_descriptor_async_transfer(to_accel.dev, &to_accel.desc);
-		if (retVal) {
-			DBG_PRINT("ERROR %d\n", retVal);
-		}else{
-			DBG_PRINT("Successful write\n");
-		}
+	//printf("Attempting DMA transfer...\n");
 
 	retVal = alt_msgdma_standard_descriptor_sync_transfer(to_accel.dev, &to_accel.desc);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}else{
-		DBG_PRINT("Successful write\n");
+		//DBG_PRINT("Successful write\n");
 	}
 
 	retVal = alt_msgdma_standard_descriptor_sync_transfer(from_accel.dev, &from_accel.desc);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}else{
-		DBG_PRINT("Successful read\n");
+		//DBG_PRINT("Successful read\n");
 	}
 }
 

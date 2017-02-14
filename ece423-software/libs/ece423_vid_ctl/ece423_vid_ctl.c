@@ -213,7 +213,7 @@ void ece423_video_display_switch_frames(ece423_video_display* display) {
 		display->buffer_being_displayed = iNext_Rd_Buf;
 	}
 
-	%printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
+	printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
 }
 /******************************************************************
  *  Function: ece423_video_display_clear_screen

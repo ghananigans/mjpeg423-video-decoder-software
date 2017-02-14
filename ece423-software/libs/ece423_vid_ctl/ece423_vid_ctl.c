@@ -172,9 +172,7 @@ int ece423_video_display_buffer_is_available(ece423_video_display* display) {
 void ece423_video_display_switch_frames(ece423_video_display* display) {
 	int iNext_Rd_Buf;
 
-	alt_u32 RD_Desc_Fifo_Level = (IORD_ALTERA_MSGDMA_CSR_DESCRIPTOR_FILL_LEVEL(
-			display->mSGDMA->csr_base) & ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_MASK)
-			>> ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_OFFSET;
+	alt_u32 RD_Desc_Fifo_Level;
 
 	iNext_Rd_Buf = ((display->buffer_being_displayed + 1)
 			% display->num_frame_buffers);
@@ -198,30 +196,31 @@ void ece423_video_display_switch_frames(ece423_video_display* display) {
 	// Check if there is a new buffer to display
 	else if (iNext_Rd_Buf != display->buffer_being_written) {
 
-		// Wait until the last buffer is displayed
-		while (RD_Desc_Fifo_Level > 1) {
-
-			RD_Desc_Fifo_Level = (IORD_ALTERA_MSGDMA_CSR_DESCRIPTOR_FILL_LEVEL(
-					display->mSGDMA->csr_base)
-					& ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_MASK)
-					>> ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_OFFSET;
-		}
-
 		// Transfer Descriptor for Frame to mSGDMA
 		while (alt_msgdma_standard_descriptor_async_transfer(display->mSGDMA,
 				display->buffer_ptrs[iNext_Rd_Buf]->desc_base) != 0) {
 		}  // Keep Trying until there is room to Transfer another Frame
 
+		// Wait until the last buffer is displayed
+		 do {
+
+			RD_Desc_Fifo_Level = (IORD_ALTERA_MSGDMA_CSR_DESCRIPTOR_FILL_LEVEL(
+					display->mSGDMA->csr_base)
+					& ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_MASK)
+					>> ALTERA_MSGDMA_CSR_READ_FILL_LEVEL_OFFSET;
+		} while (RD_Desc_Fifo_Level > 1);
+
 		display->buffer_being_displayed = iNext_Rd_Buf;
 	}
 
-	//printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
+	%printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
 }
 /******************************************************************
  *  Function: ece423_video_display_clear_screen
  *
  *  Purpose: Uses the fast memset routine to clear entire Frame Buf
- *             User can specify black(0x00) or white(0xFF).
+ *             User can specify green(0x00) or purple(0xFF).
+ *				(Note: the color format is YCbCr)
  *
  ******************************************************************/
 void ece423_video_display_clear_screen(ece423_video_display* display,

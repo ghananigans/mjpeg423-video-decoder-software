@@ -22,10 +22,12 @@
 #define DESC_CONTROL_FROM_IDCT_ACCEL      (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK | ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GENERATE_EOP_MASK | ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 #define DESC_CONTROL_TO_IDCT_ACCEL        (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GENERATE_EOP_MASK | ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 
+
+
 typedef struct mdma {
-	alt_msgdma_dev* dev;
 	alt_msgdma_standard_descriptor desc;
-}mdma_t;
+	alt_msgdma_dev* dev;
+} mdma_t;
 
 
 static mdma_t from_accel;
@@ -61,8 +63,8 @@ int init_idct_accel (void){
 	//retVal = alt_ic_isr_register(MDMA_FROM_IDCT_ACCEL_CSR_IRQ_INTERRUPT_CONTROLLER_ID, MDMA_FROM_IDCT_ACCEL_CSR_IRQ, \
 	//		dmaIrq, NULL, NULL) ? 0 : 1;
 
-	alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
-	alt_msgdma_register_callback(to_accel.dev, &dmaToIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+	//alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+	//alt_msgdma_register_callback(to_accel.dev, &dmaToIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
 
 	return retVal;
 }
@@ -71,25 +73,38 @@ void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer,
 	int retVal;
 
 	retVal = alt_msgdma_construct_standard_mm_to_st_descriptor(to_accel.dev,
-					&to_accel.desc,(alt_u32 *)inputBuffer, sizeOfBuffers, ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK);
+					&to_accel.desc,(alt_u32 *)inputBuffer, 127, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
 
 	retVal = alt_msgdma_construct_standard_st_to_mm_descriptor(from_accel.dev,
-					&from_accel.desc,(alt_u32 *)outputBuffer, sizeOfBuffers, ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK);
+					&from_accel.desc,(alt_u32 *)outputBuffer, 127, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
+
+	printf("Attempting DMA transfer...\n");
 
 	retVal = alt_msgdma_standard_descriptor_async_transfer(to_accel.dev, &to_accel.desc);
+		if (retVal) {
+			DBG_PRINT("ERROR %d\n", retVal);
+		}else{
+			DBG_PRINT("Successful write\n");
+		}
+
+	retVal = alt_msgdma_standard_descriptor_sync_transfer(to_accel.dev, &to_accel.desc);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
+	}else{
+		DBG_PRINT("Successful write\n");
 	}
 
-	retVal = alt_msgdma_standard_descriptor_async_transfer(from_accel.dev, &from_accel.desc);
+	retVal = alt_msgdma_standard_descriptor_sync_transfer(from_accel.dev, &from_accel.desc);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
+	}else{
+		DBG_PRINT("Successful read\n");
 	}
 }
 

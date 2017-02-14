@@ -203,8 +203,34 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 	}
 }
 
+uint32_t testBuffer[100] = {5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5,
+		5, 5, 5, 5, 5, 5, 5, 5, 5
+};
+
+void testMain(){
+
+	init_idct_accel();
+
+	printf("Init Complete...\n");
+
+	idct_accel_calculate_buffer(testBuffer, testBuffer, 128);
+
+	while(1){}
+}
+
 int main() {
 	printf("Application Starting...\n");
+
+	testMain();
 
 	// File System
 	FAT_HANDLE hFAT;

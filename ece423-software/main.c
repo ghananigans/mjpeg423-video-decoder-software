@@ -27,6 +27,7 @@
 #include "playback.h"
 #include "key_controls.h"
 #include "idct_accel.h"
+#include <io.h>
 
 #include "libs/ece423_sd/ece423_sd.h"
 
@@ -203,83 +204,8 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 	}
 }
 
-void print_buffer(int16_t volatile (* buffer)[8]) {
-	for (int i = 0; i < 8; ++i) {
-		for (int j = 0; j < 8; ++j) {
-			printf("%d ", buffer[i][j]);
-		}
-
-		printf("\n");
-	}
-}
-int16_t volatile testBuffer1[8][8] = {
-		{100, 0, 0, 0, 0, 0, 0, 0},
-		{0, 100, 0, 0, 0, 0, 0, 0},
-		{0, 0, 100, 0, 0, 0, 0, 0},
-		{0, 0, 0, 100, 0, 0, 0, 0},
-		{0, 0, 0, 0, 100, 0, 0, 0},
-		{0, 0, 0, 0, 0, 100, 0, 0},
-		{0, 0, 0, 0, 0, 0, 100, 0},
-		{0, 0, 0, 0, 0, 0, 0, 100}
-};
-
-int16_t volatile testBuffer2[8][8] = {
-		{1240,   0, -10, 0, 0, 0, 0, 0},
-		{ -24, -12,   0, 0, 0, 0, 0, 0},
-		{ -14, -13,   0, 0, 0, 0, 0, 0},
-		{  0,    0,   0, 0, 0, 0, 0, 0},
-		{  0,    0,   0, 0, 0, 0, 0, 0},
-		{  0,    0,   0, 0, 0, 0, 0, 0},
-		{  0,    0,   0, 0, 0, 0, 0, 0},
-		{  0,    0,   0, 0, 0, 0, 0, 0}
-};
-
-int16_t volatile outputBuffer[8][8] = {
-		{1, 2, 3, 4, 5, 6, 7, 8},
-		{2, 2, 3, 4, 5, 6, 7, 8},
-		{3, 2, 3, 4, 5, 6, 7, 8},
-		{4, 2, 3, 4, 5, 6, 7, 8},
-		{5, 2, 3, 4, 5, 6, 7, 8},
-		{6, 2, 3, 4, 5, 6, 7, 8},
-		{7, 2, 3, 4, 5, 6, 7, 8},
-		{8, 2, 3, 4, 5, 6, 7, 8}
-};
-
-void testMain(){
-	int16_t volatile (* test1P)[8] = (int16_t volatile (*)[8]) &testBuffer1;
-	int16_t volatile (* test2P)[8] = (int16_t volatile (*)[8]) &testBuffer2;
-	int16_t volatile (* outP)[8] = (int16_t volatile (*)[8]) &outputBuffer;
-
-	init_idct_accel();
-
-	printf("Init Complete...\n");
-
-	printf("\nPrint first buffer\n");
-	print_buffer(test1P);
-
-	printf("\nPrint second buffer\n");
-	print_buffer(test2P);
-
-	printf("\nPrint out buffer\n");
-	print_buffer(outP);
-
-	printf("\nFirst Test\n");
-	idct_accel_calculate_buffer((uint32_t * ) test1P, (uint32_t * ) outP, sizeof(testBuffer1));
-	print_buffer(outP);
-	printf("Done test 1\n");
-
-	printf("\nSecond Test\n");
-	idct_accel_calculate_buffer((uint32_t * ) test2P, (uint32_t * ) outP, sizeof(testBuffer2));
-	print_buffer(outP);
-	printf("Done test 2\n");
-
-	while(1){}
-}
-
 int main() {
 	printf("Application Starting...\n");
-
-	testMain();
 
 	// File System
 	FAT_HANDLE hFAT;
@@ -342,6 +268,7 @@ int main() {
 	//
 	retVal = init_idct_accel();
 	assert(retVal, "Failed to init idct accel!\n");
+	//test_idct();
 
 	//
 	// Init playback

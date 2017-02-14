@@ -46,6 +46,58 @@ static void dmaFromIrq (void* isr_context){
 	done2 = 0;
 }
 
+void print_buffer16(int16_t volatile (* buffer)[8]) {
+	for (int i = 0; i < 8; ++i) {
+		for (int j = 0; j < 8; ++j) {
+			printf("%d ", (int16_t)IORD_16DIRECT(&buffer[i][j], 0));
+		}
+
+		printf("\n");
+	}
+}
+
+void print_buffer8(uint8_t volatile (* buffer)[8]) {
+	for (int i = 0; i < 8; ++i) {
+		for (int j = 0; j < 8; ++j) {
+			printf("%d ", (uint8_t)IORD_8DIRECT(&buffer[i][j], 0));
+		}
+
+		printf("\n");
+	}
+}
+
+int16_t volatile testBuffer1[8][8] = {
+		{100, 0, 0, 0, 0, 0, 0, 0},
+		{0, 100, 0, 0, 0, 0, 0, 0},
+		{0, 0, 100, 0, 0, 0, 0, 0},
+		{0, 0, 0, 100, 0, 0, 0, 0},
+		{0, 0, 0, 0, 100, 0, 0, 0},
+		{0, 0, 0, 0, 0, 100, 0, 0},
+		{0, 0, 0, 0, 0, 0, 100, 0},
+		{0, 0, 0, 0, 0, 0, 0, 100}
+};
+
+int16_t volatile testBuffer2[8][8] = {
+		{1240,   0, -10, 0, 0, 0, 0, 0},
+		{ -24, -12,   0, 0, 0, 0, 0, 0},
+		{ -14, -13,   0, 0, 0, 0, 0, 0},
+		{  0,    0,   0, 0, 0, 0, 0, 0},
+		{  0,    0,   0, 0, 0, 0, 0, 0},
+		{  0,    0,   0, 0, 0, 0, 0, 0},
+		{  0,    0,   0, 0, 0, 0, 0, 0},
+		{  0,    0,   0, 0, 0, 0, 0, 0}
+};
+
+uint8_t volatile outputBuffer[8][8] = {
+		{1, 2, 3, 4, 5, 6, 7, 8},
+		{2, 2, 3, 4, 5, 6, 7, 8},
+		{3, 2, 3, 4, 5, 6, 7, 8},
+		{4, 2, 3, 4, 5, 6, 7, 8},
+		{5, 2, 3, 4, 5, 6, 7, 8},
+		{6, 2, 3, 4, 5, 6, 7, 8},
+		{7, 2, 3, 4, 5, 6, 7, 8},
+		{8, 2, 3, 4, 5, 6, 7, 8}
+};
 
 int init_idct_accel (void){
 	int retVal = 1;
@@ -69,22 +121,17 @@ int init_idct_accel (void){
 	return retVal;
 }
 
-void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfBuffers){
+void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfInputBuffer, uint32_t sizeOfOutputBuffer){
 	int retVal;
 
-	//
-	// Flush input buffer cache
-	//
-	alt_dcache_flush(inputBuffer, sizeOfBuffers);
-
 	retVal = alt_msgdma_construct_standard_mm_to_st_descriptor(to_accel.dev,
-					&to_accel.desc,(alt_u32 *)inputBuffer, sizeOfBuffers, 0);
+					&to_accel.desc,(alt_u32 *)inputBuffer, sizeOfInputBuffer, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
 
 	retVal = alt_msgdma_construct_standard_st_to_mm_descriptor(from_accel.dev,
-					&from_accel.desc,(alt_u32 *)outputBuffer, sizeOfBuffers, 0);
+					&from_accel.desc,(alt_u32 *)outputBuffer, sizeOfOutputBuffer, 0);
 	if (retVal) {
 		DBG_PRINT("ERROR %d\n", retVal);
 	}
@@ -106,3 +153,33 @@ void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer,
 	}
 }
 
+void test_idct (void){
+	int16_t volatile (* test1P)[8] = (int16_t volatile (*)[8]) &testBuffer1;
+	int16_t volatile (* test2P)[8] = (int16_t volatile (*)[8]) &testBuffer2;
+	uint8_t volatile (* outP)[8] = (uint8_t volatile (*)[8]) &outputBuffer;
+
+	printf("Testing IDCT...\n");
+
+	printf("\nPrint first buffer\n");
+	print_buffer16(test1P);
+
+	printf("\nPrint second buffer\n");
+	print_buffer16(test2P);
+
+	printf("\nPrint out buffer\n");
+	print_buffer8(outP);
+
+	printf("\nFirst Test\n");
+	idct_accel_calculate_buffer((uint32_t *) test1P, (uint32_t *) outP, sizeof(testBuffer1), sizeof(outputBuffer));
+	print_buffer16(test1P);
+	print_buffer8(outP);
+	printf("Done test 1\n");
+
+	printf("\nSecond Test\n");
+	idct_accel_calculate_buffer((uint32_t *) test2P, (uint32_t *) outP, sizeof(testBuffer2), sizeof(outputBuffer));
+	print_buffer16(test2P);
+	print_buffer8(outP);
+	printf("Done test 2\n");
+
+	while(1){}
+}

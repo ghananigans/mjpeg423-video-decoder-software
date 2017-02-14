@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: ../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Mon Feb 13 17:05:09 EST 2017
+ * Generated: Tue Feb 14 17:02:11 EST 2017
  */
 
 /*
@@ -561,7 +561,7 @@
 #define SYSID_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_NAME "/dev/sysid"
 #define SYSID_SPAN 8
-#define SYSID_TIMESTAMP 1487020509
+#define SYSID_TIMESTAMP 1487107871
 #define SYSID_TYPE "altera_avalon_sysid_qsys"
 
 

@@ -246,6 +246,15 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->YDCAC,
+		    			(uint32_t*)mpegFrameBuffer->Yblock,
+		    			hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+
+		/*
 	for(int b = 0; b < hYb_size*wYb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -268,6 +277,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
@@ -281,6 +291,14 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CbDCAC,
+						(uint32_t*)mpegFrameBuffer->Cbblock,
+						hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -303,6 +321,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
@@ -316,6 +335,15 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CrDCAC,
+						(uint32_t*)mpegFrameBuffer->Crblock,
+						hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+
+		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -338,6 +366,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME

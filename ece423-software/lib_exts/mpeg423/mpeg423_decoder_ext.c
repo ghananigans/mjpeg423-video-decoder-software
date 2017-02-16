@@ -297,7 +297,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		//
 		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CbDCAC,
 						(uint32_t*)mpegFrameBuffer->Cbblock,
-						hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
 		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
@@ -341,7 +341,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		//
 		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CrDCAC,
 						(uint32_t*)mpegFrameBuffer->Crblock,
-						hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
 
 		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
@@ -373,6 +373,8 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, 0);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+		wait_for_idct_finsh();
 
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_FRAME, 0);

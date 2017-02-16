@@ -10,6 +10,7 @@
 #include "../../utils.h"
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
 #include "../../idct_accel.h"
+#include "../../ycbcr_to_rgb_accel.h"
 #include <sys/alt_cache.h>
 
 #ifdef TIMING_TESTS
@@ -384,8 +385,11 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	PROFILE_TIME_START(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
+	ycbcr_to_rgb_accel_calculate_buffer(mpegFrameBuffer->Yblock, mpegFrameBuffer->Crblock, mpegFrameBuffer->Cbblock,
+			outputBuffer, hCb_size, wCb_size, mpegHeader->w_size);
+
 	//ybcbr to rgb conversion
-	for (int h = 0; h < hCb_size; h++){
+	/*for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {
 			int b = h * wCb_size + w;
 #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
@@ -404,6 +408,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
 		}
 	}
+*/
 
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);

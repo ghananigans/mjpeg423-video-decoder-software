@@ -231,7 +231,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifdef TIMING_TESTS
 
 	//
-	// Flush input buffer cache
+	// Flush data cache
 	//
 	alt_dcache_flush_all();
 

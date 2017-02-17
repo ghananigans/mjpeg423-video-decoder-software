@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: ../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Thu Feb 16 19:03:38 EST 2017
+ * Generated: Thu Feb 16 21:01:41 EST 2017
  */
 
 /*

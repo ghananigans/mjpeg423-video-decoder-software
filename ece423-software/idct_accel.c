@@ -7,17 +7,14 @@
 
 #include "idct_accel.h"
 #include "utils.h"
-
-#include "system.h"
-#include <sys/alt_cache.h>
-#include <malloc.h>
-#include <priv/alt_file.h>
-#include <sys/alt_irq.h>
-
-#include "altera_msgdma.h"
-#include "altera_msgdma_descriptor_regs.h"
-#include "altera_msgdma_csr_regs.h"
 #include <stdbool.h>
+
+#ifdef IDCT_HW_ACCEL
+#include <system.h>
+
+#include <altera_msgdma.h>
+#include <altera_msgdma_descriptor_regs.h>
+#include <altera_msgdma_csr_regs.h>
 
 #include "mdma.h"
 
@@ -90,10 +87,12 @@ uint8_t volatile outputBuffer[8][8] = {
 		{7, 2, 3, 4, 5, 6, 7, 8},
 		{8, 2, 3, 4, 5, 6, 7, 8}
 };
+#else // #ifdef IDCT_HW_ACCEL
+#include "libs/mjpeg423/decoder/mjpeg423_decoder.h"
+#endif // #ifdef IDCT_HW_ACCEL
 
 int init_idct_accel (void){
-	int retVal = 1;
-
+#ifdef IDCT_HW_ACCEL
 	from_accel.dev = alt_msgdma_open(MDMA_FROM_IDCT_ACCEL_CSR_NAME);
 	assert(from_accel.dev, "MDMA from failed to open\n");
 
@@ -102,18 +101,16 @@ int init_idct_accel (void){
 
 	//
 	// Interrupt Setup
-	// To match our 1 = success and 0 = failure convention
 	//
-	//retVal = alt_ic_isr_register(MDMA_FROM_IDCT_ACCEL_CSR_IRQ_INTERRUPT_CONTROLLER_ID, MDMA_FROM_IDCT_ACCEL_CSR_IRQ, \
-	//		dmaIrq, NULL, NULL) ? 0 : 1;
-
 	alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
 	//alt_msgdma_register_callback(to_accel.dev, &dmaToIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+#endif // #ifdef IDCT_HW_ACCEL
 
-	return retVal;
+	return 1;
 }
 
 void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfInputBuffer, uint32_t sizeOfOutputBuffer){
+#ifdef IDCT_HW_ACCEL
 	int retVal;
 
 	++working_count;
@@ -133,13 +130,25 @@ void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer,
 
 	retVal = alt_msgdma_standard_descriptor_async_transfer(from_accel.dev, &from_accel.desc);
 	assert(retVal == 0, "ERROR: %d\n", retVal);
+#else // #ifdef IDCT_HW_ACCEL
+	int max = sizeOfInputBuffer / sizeof(dct_block_t);
+	dct_block_t* dct_block = (dct_block_t*) inputBuffer;
+	color_block_t* color_block = (color_block_t*) outputBuffer;
+
+	for (int i = 0; i < max; ++i) {
+		idct(&dct_block[i], &color_block[i]);
+	}
+#endif // #ifdef IDCT_HW_ACCEL
 }
 
 void wait_for_idct_finsh (void) {
+#ifdef IDCT_HW_ACCEL
 	while (working_count != 0);
+#endif // #ifdef IDCT_HW_ACCEL
 }
 
-void test_idct (void){
+void test_idct_accel (void){
+#ifdef IDCT_HW_ACCEL
 	int16_t volatile (* test1P)[8] = (int16_t volatile (*)[8]) &testBuffer1;
 	int16_t volatile (* test2P)[8] = (int16_t volatile (*)[8]) &testBuffer2;
 	uint8_t volatile (* outP)[8] = (uint8_t volatile (*)[8]) &outputBuffer;
@@ -166,6 +175,9 @@ void test_idct (void){
 	print_buffer16(test2P);
 	print_buffer8(outP);
 	printf("Done test 2\n");
+#else // #ifdef IDCT_HW_ACCEL
+	printf("IDCT_HW_ACCEL NOT ENABLED!\n");
+#endif // #ifdef IDCT_HW_ACCEL
 
 	while(1){}
 }

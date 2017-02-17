@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Feb 16, 2017 8:39:56 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1487295596988</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Feb 16, 2017 9:01:41 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1487296901141</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\ece423-bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>

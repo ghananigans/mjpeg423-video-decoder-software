@@ -8,13 +8,12 @@
 #include "ycbcr_to_rgb_accel.h"
 #include "utils.h"
 
-#include "system.h"
-#include <sys/alt_cache.h>
-#include <sys/alt_irq.h>
+#ifdef YCBCR_TO_RGB_HW_ACCEL
+#include <system.h>
 
-#include "altera_msgdma.h"
-#include "altera_msgdma_descriptor_regs.h"
-#include "altera_msgdma_csr_regs.h"
+#include <altera_msgdma.h>
+#include <altera_msgdma_descriptor_regs.h>
+#include <altera_msgdma_csr_regs.h>
 #include <stdbool.h>
 
 #include "mdma.h"
@@ -24,7 +23,7 @@ static mdma_t to_accel_y;
 static mdma_t to_accel_cb;
 static mdma_t to_accel_cr;
 
-#ifdef YCBCR_TO_RGB_HW_ACCEL
+
 static bool volatile done = 0;
 
 static void dmaFromIrq (void* isr_context){

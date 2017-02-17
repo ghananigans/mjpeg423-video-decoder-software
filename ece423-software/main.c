@@ -13,10 +13,6 @@
  * "small_hello_world" template.
  *
  */
-
-
-#define NULL_COLORCONV
-
 #include <stdio.h>
 #include <system.h>
 #include <stdint.h>

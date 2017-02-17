@@ -230,12 +230,14 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	PROFILE_TIME_END(TIMING_TEST_LOSSLESS_CR, frame_type);
 #endif // #ifdef TIMING_TESTS
 
+#ifdef IDCT_HW_ACCEL
 	//
 	// Flush data cache
 	//
 	alt_dcache_flush_all();
+#endif // #ifdef IDCT_HW_ACCEL
 
-	//fdct
+	//idct
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
@@ -380,6 +382,15 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
+
+#ifndef IDCT_HW_ACCEL
+#ifdef YCBCR_TO_RGB_HW_ACCEL
+	//
+	// Flush data cache
+	//
+	alt_dcache_flush_all();
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
+#endif // #ifdef IDCT_HW_ACCEL
 
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 	PROFILE_TIME_START(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);

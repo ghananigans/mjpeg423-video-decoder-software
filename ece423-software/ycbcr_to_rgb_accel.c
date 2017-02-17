@@ -24,16 +24,22 @@ static mdma_t to_accel_y;
 static mdma_t to_accel_cb;
 static mdma_t to_accel_cr;
 
+#ifdef YCBCR_TO_RGB_HW_ACCEL
 static bool volatile done = 0;
 
 static void dmaFromIrq (void* isr_context){
 	IOWR_ALTERA_MSGDMA_CSR_STATUS(MDMA_FROM_IDCT_ACCEL_CSR_BASE, 0x1);
 	done = 1;
 }
+#else // #ifdef YCBCR_TO_RGB_HW_ACCEL
+typedef union rgb_pixel_t_uint32_t_union {
+	uint32_t data;
+	rgb_pixel_t rgb;
+} rgb_pixel_t_uint32_t_union_t;
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
 
 int init_ycbcr_to_rgb_accel (void) {
-	int retVal = 1;
-
+#ifdef YCBCR_TO_RGB_HW_ACCEL
 	from_accel.dev = alt_msgdma_open(MDMA_FROM_YCBCR_TO_RGB_ACCEL_CSR_NAME);
 	assert(from_accel.dev, "MDMA from failed to open\n");
 
@@ -47,18 +53,15 @@ int init_ycbcr_to_rgb_accel (void) {
 	assert(to_accel_cr.dev, "MDMA to failed to open\n");
 
 	alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
 
 	return 1;
 }
 
-union temp {
-	uint32_t data;
-	rgb_pixel_t rgb;
-};
-
 void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* crBlock, color_block_t* cbBlock,
 		rgb_pixel_t* outputBuffer, int hCb_size, int wCb_size, int w_size) {
 
+#ifdef YCBCR_TO_RGB_HW_ACCEL
 	int retVal;
 
 	retVal = alt_msgdma_construct_standard_mm_to_st_descriptor(to_accel_y.dev,
@@ -101,7 +104,7 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 
 	printf("%d %d %d %d\n", crBlock[0][0][2], yBlock[0][0][2], cbBlock[0][0][2], 0);
 	printf("%d %d %d %d\n", outputBuffer[2].red, outputBuffer[2].green, outputBuffer[2].blue, outputBuffer[2].alpha);
-/*
+#else // #ifdef YCBCR_TO_RGB_HW_ACCEL
     for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {
 			int b = h * wCb_size + w;
@@ -110,7 +113,7 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 				int index = ((h << 3) + y) * w_size + (w << 3);
 
 				for(int x = 0; x < 8; x++){
-					union temp t;
+					rgb_pixel_t_uint32_t_union_t t;
 					//rgb_pixel_t pixel;
 					//pixel.alpha = 0;
 					//pixel.red = crBlock[b][y][x];
@@ -124,5 +127,5 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 			}
 		}
     }
-    */
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
 }

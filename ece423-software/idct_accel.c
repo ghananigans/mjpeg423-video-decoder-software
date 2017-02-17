@@ -19,16 +19,10 @@
 #include "altera_msgdma_csr_regs.h"
 #include <stdbool.h>
 
+#include "mdma.h"
+
 #define DESC_CONTROL_FROM_IDCT_ACCEL      (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK | ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 #define DESC_CONTROL_TO_IDCT_ACCEL        (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
-
-
-
-typedef struct mdma {
-	alt_msgdma_standard_descriptor desc;
-	alt_msgdma_dev* dev;
-} mdma_t;
-
 
 static mdma_t from_accel;
 static mdma_t to_accel;

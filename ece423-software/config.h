@@ -40,5 +40,9 @@
 //
 #define DEBUG_PRINT_ENABLED
 
+//
+// Uncomment to not use the HW accelerator for YCBCR_TO_RGB calculations
+//
+#define YCBCR_TO_RGB_HW_ACCEL
 
 #endif /* CONFIG_H_ */

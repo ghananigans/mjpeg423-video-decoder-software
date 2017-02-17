@@ -173,6 +173,7 @@ C_SRCS += key_controls.c
 C_SRCS += timer.c
 C_SRCS += profile.c
 C_SRCS += idct_accel.c
+C_SRCS += ycbcr_to_rgb_accel.c
 CXX_SRCS :=
 ASM_SRCS :=
 

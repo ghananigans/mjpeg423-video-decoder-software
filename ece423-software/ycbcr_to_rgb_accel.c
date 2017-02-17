@@ -84,6 +84,11 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 					ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK);
 	assert(retVal == 0, "ERROR: %d\n", retVal);
 
+	//
+	// Wait for all 4 of these below to finsh at the end (simply wait until
+	// the from_accel is done since we can only output after the inputs have been
+	// recieved (to_accel_x). Can't to sync because it might take more than 5 ms.
+	//
 	retVal = alt_msgdma_standard_descriptor_async_transfer(to_accel_y.dev, &to_accel_y.desc);
 	assert(retVal == 0, "ERROR: %d\n", retVal);
 
@@ -101,9 +106,6 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 	//
 	while(done == 0);
 	done = 0;
-
-	printf("%d %d %d %d\n", crBlock[0][0][2], yBlock[0][0][2], cbBlock[0][0][2], 0);
-	printf("%d %d %d %d\n", outputBuffer[2].red, outputBuffer[2].green, outputBuffer[2].blue, outputBuffer[2].alpha);
 #else // #ifdef YCBCR_TO_RGB_HW_ACCEL
     for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {

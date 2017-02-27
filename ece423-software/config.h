@@ -24,11 +24,11 @@
 #define DISPLAY_HEIGHT		(480)
 
 // The number of buffers to initialize the display with
-#define NUM_OUTPUT_BUFFERS	(2)
+#define NUM_OUTPUT_BUFFERS	(5)
 
-#define FRAME_RATE_MS 		(750)
+#define FRAME_RATE_MS 		(100)
 
-#define FORCE_PERIODIC      (0)
+#define FORCE_PERIODIC      (1)
 
 //
 // Comment this out to disable timing reports
@@ -39,7 +39,7 @@
 //
 // Comment this out to remove print statements
 //
-#define DEBUG_PRINT_ENABLED
+//#define DEBUG_PRINT_ENABLED
 
 //
 // Uncomment to not use the HW accelerator for idct calculations

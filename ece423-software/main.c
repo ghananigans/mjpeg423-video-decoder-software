@@ -108,7 +108,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 		//
 		// Preview the video
 		//
-		previewVideo(display);
+		previewVideo();
 
 		//
 		// Play video and handle
@@ -155,7 +155,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 				}
 
 				// Preview the video
-				previewVideo(display);
+				previewVideo();
 
 				if (!currentlyPlaying) {
 					// If not currently playing, then go back to
@@ -166,7 +166,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 				DBG_PRINT("Rewind button pressed\n");
 
 				rewindVideo();
-				previewVideo(display);
+				previewVideo();
 
 				if (!currentlyPlaying) {
 					// If not currently playing, then go back to
@@ -176,7 +176,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 			}
 
 			DBG_PRINT("Playing video\n");
-			playVideo(display, &buttonHasBeenPressed); // Can stop because video ended OR
+			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
 
 			DBG_PRINT("Video stopped\n");
 
@@ -276,7 +276,7 @@ int main() {
 	//
 	// Init playback
 	//
-	retVal = initPlayback();
+	retVal = initPlayback(display);
 	assert(retVal, "Failed to init playback");
 
 	DBG_PRINT("Initialization complete!\n");

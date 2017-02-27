@@ -23,12 +23,8 @@ static mdma_t to_accel_y;
 static mdma_t to_accel_cb;
 static mdma_t to_accel_cr;
 
-
-static bool volatile done = 0;
-
 static void dmaFromIrq (void* isr_context){
 	IOWR_ALTERA_MSGDMA_CSR_STATUS(MDMA_FROM_IDCT_ACCEL_CSR_BASE, 0x1);
-	done = 1;
 }
 #else // #ifdef YCBCR_TO_RGB_HW_ACCEL
 typedef union rgb_pixel_t_uint32_t_union {
@@ -51,7 +47,10 @@ int init_ycbcr_to_rgb_accel (void) {
 	to_accel_cr.dev   = alt_msgdma_open(MDMA_TO_YCBCR_TO_RGB_ACCEL_CR_CSR_NAME);
 	assert(to_accel_cr.dev, "MDMA to failed to open\n");
 
-	alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+	//
+	// Interrupt setup
+	//
+	//alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
 #endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
 
 	return 1;
@@ -99,12 +98,6 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 
 	retVal = alt_msgdma_standard_descriptor_async_transfer(from_accel.dev, &from_accel.desc);
 	assert(retVal == 0, "ERROR: %d\n", retVal);
-
-	//
-	// Wait for module to finish
-	//
-	while(done == 0);
-	done = 0;
 #else // #ifdef YCBCR_TO_RGB_HW_ACCEL
     for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {
@@ -128,5 +121,15 @@ void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* c
 			}
 		}
     }
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
+}
+
+void wait_for_ycbcr_to_rgb_finsh (void) {
+#ifdef YCBCR_TO_RGB_HW_ACCEL
+	alt_u32 csr_status = 1;
+
+	while(csr_status & ALTERA_MSGDMA_CSR_BUSY_MASK){
+		csr_status = IORD_ALTERA_MSGDMA_CSR_STATUS(from_accel.dev->csr_base);
+	}
 #endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
 }

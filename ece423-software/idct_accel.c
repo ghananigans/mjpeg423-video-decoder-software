@@ -32,7 +32,6 @@ static void dmaToIrq (void* isr_context){
 
 static void dmaFromIrq (void* isr_context){
 	IOWR_ALTERA_MSGDMA_CSR_STATUS(MDMA_FROM_IDCT_ACCEL_CSR_BASE, 0x1);
-	--working_count;
 }
 
 void print_buffer16(int16_t volatile (* buffer)[8]) {
@@ -102,7 +101,7 @@ int init_idct_accel (void){
 	//
 	// Interrupt Setup
 	//
-	alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
+	//alt_msgdma_register_callback(from_accel.dev, &dmaFromIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
 	//alt_msgdma_register_callback(to_accel.dev, &dmaToIrq, ALTERA_MSGDMA_CSR_GLOBAL_INTERRUPT_MASK, NULL);
 #endif // #ifdef IDCT_HW_ACCEL
 
@@ -112,8 +111,6 @@ int init_idct_accel (void){
 void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer, uint32_t sizeOfInputBuffer, uint32_t sizeOfOutputBuffer){
 #ifdef IDCT_HW_ACCEL
 	int retVal;
-
-	++working_count;
 
 	retVal = alt_msgdma_construct_standard_mm_to_st_descriptor(to_accel.dev,
 					&to_accel.desc,(alt_u32 *)inputBuffer, sizeOfInputBuffer, DESC_CONTROL_TO_IDCT_ACCEL);
@@ -143,7 +140,11 @@ void idct_accel_calculate_buffer (uint32_t* inputBuffer, uint32_t* outputBuffer,
 
 void wait_for_idct_finsh (void) {
 #ifdef IDCT_HW_ACCEL
-	while (working_count != 0);
+	alt_u32 csr_status = 1;
+
+	while(csr_status & ALTERA_MSGDMA_CSR_BUSY_MASK){
+		csr_status = IORD_ALTERA_MSGDMA_CSR_STATUS(from_accel.dev->csr_base);
+	}
 #endif // #ifdef IDCT_HW_ACCEL
 }
 

@@ -169,7 +169,7 @@ int ece423_video_display_buffer_is_available(ece423_video_display* display) {
 	return (ret_code);
 }
 
-void ece423_video_display_switch_frames(ece423_video_display* display) {
+int ece423_video_display_switch_frames(ece423_video_display* display) {
 	int iNext_Rd_Buf;
 
 	alt_u32 RD_Desc_Fifo_Level;
@@ -212,8 +212,13 @@ void ece423_video_display_switch_frames(ece423_video_display* display) {
 
 		display->buffer_being_displayed = iNext_Rd_Buf;
 	}
+	else {
+		// Switching to the next frame failed
+		return -1;
+	}
 
-	printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
+	return 0;
+	//printf("Displayed %d - Written %d\n", display->buffer_being_displayed, display->buffer_being_written);
 }
 /******************************************************************
  *  Function: ece423_video_display_clear_screen
@@ -237,16 +242,16 @@ void ece423_video_display_clear_screen(ece423_video_display* display,
 /******************************************************************
  *          ece423_video_display_get_descriptor_span
  *          -------------------------------------
- * 
+ *
  * This Calcs the number of bytes required for descriptor storage
- * 
+ *
  * The New mSGDMA only needs 1 descriptor per Frame
  *
  * The OLD SGDMA nedded Multiple descriptors per Frame
- * 
+ *
  * display->descriptors_per_frame
  *  MUST be SetUp Before Calling this func
- * 
+ *
  * Returns: Size (in bytes) of descriptor memory required.
  ******************************************************************/
 alt_u32 ece423_video_display_get_descriptor_span(ece423_video_display *display) {
@@ -353,4 +358,3 @@ int ece423_init_hdmi() {
 
 	return 0;
 }
-

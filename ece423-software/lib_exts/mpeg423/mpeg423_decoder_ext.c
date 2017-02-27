@@ -377,6 +377,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Wait for all Idct calculations to finish
+		//
 		wait_for_idct_finsh();
 
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
@@ -399,7 +402,11 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	ycbcr_to_rgb_accel_calculate_buffer(mpegFrameBuffer->Yblock, mpegFrameBuffer->Crblock, mpegFrameBuffer->Cbblock,
 			outputBuffer, hCb_size, wCb_size, mpegHeader->w_size);
 
-	//ybcbr to rgb conversion
+	//
+	// Wait for module to finish
+	//
+	wait_for_ycbcr_to_rgb_finsh();
+
 	/*for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {
 			int b = h * wCb_size + w;

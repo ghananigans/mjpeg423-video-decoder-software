@@ -64,7 +64,7 @@ static inline void playFrame (bool forcePeriodic) {
 	DBG_PRINT("Frame #%u:\n", playbackData.processedFrame);
 	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader,
 			&playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
-	assert(retVal, "Failed to load next frame!");
+	assert(retVal, "Failed to load next frame! %d", retVal);
 
 	// Flag the buffer as written
 	ece423_video_display_register_written_buffer(playbackData.display);

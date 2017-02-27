@@ -18,7 +18,7 @@
 #endif // #ifdef TIMING_TESTS
 
 #define ERROR_AND_EXIT(str) {		\
-    DBG_PRINT("Error: %s\n", str);	\
+    printf("Error: %s\n", str);		\
     return 0;						\
 }
 
@@ -154,7 +154,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 	//read frame payload
 	if (!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) {
-		ERROR_AND_EXIT("cannot read input file");
+		ERROR_AND_EXIT("cannot read frame header");
 	}
 
 	frame_size  = frame_header[0];
@@ -180,7 +180,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifdef TIMING_TEST_SD_READ
 
 	if (!read) {
-		ERROR_AND_EXIT("cannot read input file");
+		ERROR_AND_EXIT("cannot read frame data");
 	}
 
 	//set the Cb and Cr bitstreams to point to the right location

@@ -182,11 +182,13 @@ void idct(pdct_block_t DCAC, pcolor_block_t block)
 
 #else /* Null implementation */
 
+#define NORMALIZE(x) ( ( (x) < 0) ? 0 : ( ((x) > 255) ? 255 : (x) ) )
+
 void idct(pdct_block_t DCAC, pcolor_block_t block)
 {
     for(int row = 0 ; row < 8; row ++)
         for(int column = 0; column < 8; column++)
-            block[row][column] = DCAC[row][column];
+            block[row][column] = NORMALIZE(DCAC[row][column]);
 }
 
 #endif

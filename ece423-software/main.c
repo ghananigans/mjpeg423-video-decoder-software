@@ -13,10 +13,6 @@
  * "small_hello_world" template.
  *
  */
-
-
-#define NULL_COLORCONV
-
 #include <stdio.h>
 #include <system.h>
 #include <stdint.h>
@@ -26,6 +22,10 @@
 
 #include "playback.h"
 #include "key_controls.h"
+#include "idct_accel.h"
+#include "ycbcr_to_rgb_accel.h"
+#include <io.h>
+
 #include "libs/ece423_sd/ece423_sd.h"
 
 #ifdef TIMING_TESTS
@@ -108,7 +108,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 		//
 		// Preview the video
 		//
-		previewVideo(display);
+		previewVideo();
 
 		//
 		// Play video and handle
@@ -155,7 +155,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 				}
 
 				// Preview the video
-				previewVideo(display);
+				previewVideo();
 
 				if (!currentlyPlaying) {
 					// If not currently playing, then go back to
@@ -166,7 +166,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 				DBG_PRINT("Rewind button pressed\n");
 
 				rewindVideo();
-				previewVideo(display);
+				previewVideo();
 
 				if (!currentlyPlaying) {
 					// If not currently playing, then go back to
@@ -176,7 +176,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 			}
 
 			DBG_PRINT("Playing video\n");
-			playVideo(display, &buttonHasBeenPressed); // Can stop because video ended OR
+			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
 
 			DBG_PRINT("Video stopped\n");
 
@@ -261,9 +261,22 @@ int main() {
 	assert(retVal, "Failed to init keys");
 
 	//
+	// Init IDCT accel
+	//
+	retVal = init_idct_accel();
+	assert(retVal, "Failed to init idct accel!\n");
+	//test_idct();
+
+	//
+	// Init ycbcr_to_rgb accell
+	//
+	retVal = init_ycbcr_to_rgb_accel();
+	assert(retVal, "Failed to ycbcr_to_rgb accel!\n");
+
+	//
 	// Init playback
 	//
-	retVal = initPlayback();
+	retVal = initPlayback(display);
 	assert(retVal, "Failed to init playback");
 
 	DBG_PRINT("Initialization complete!\n");

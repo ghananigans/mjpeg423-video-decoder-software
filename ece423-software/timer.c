@@ -45,10 +45,14 @@ int initTimer (unsigned int milliseconds, void (*timerTickFunc)(void)) {
 }
 
 void startTimer (void) {
+	DBG_PRINT("Starting Timer\n");
+
 	IOWR_ALTERA_AVALON_TIMER_CONTROL(TIMER_1_BASE, ALTERA_AVALON_TIMER_CONTROL_ITO_MSK
 			| ALTERA_AVALON_TIMER_CONTROL_CONT_MSK | ALTERA_AVALON_TIMER_CONTROL_START_MSK);
 }
 
 void stopTimer (void) {
+	DBG_PRINT("Stopping Timer\n");
+
 	IOWR_ALTERA_AVALON_TIMER_CONTROL(TIMER_1_BASE, ALTERA_AVALON_TIMER_CONTROL_STOP_MSK);
 }

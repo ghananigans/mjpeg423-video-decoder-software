@@ -19,11 +19,13 @@
 
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
-	uint32_t currentFrame; // 0 index frames
+	uint32_t volatile currentFrame; // 0 index frames
+	uint32_t processedFrame;
 	FAT_FILE_HANDLE hFile;
 	MPEG_FILE_HEADER mpegHeader;
 	MPEG_FILE_TRAILER mpegTrailer;
 	MPEG_WORKING_BUFFER mpegFrameBuffer;
+	ece423_video_display* display;
 }PLAYBACK_DATA;
 
 volatile bool interuptFlag = false;
@@ -36,41 +38,51 @@ static PLAYBACK_DATA playbackData;
  */
 
 static void timerFunction (void) {
-	switchFrame = true;
+	//switchFrame = true;
+	int retVal;
+	retVal = ece423_video_display_switch_frames(playbackData.display);
+	if (retVal != -1) {
+		playbackData.currentFrame++;
+	}
 }
 
 /*
  *   Private playback api
  */
 
-static inline void playFrame (ece423_video_display* display, bool forcePeriodic) {
+static inline void playFrame (bool forcePeriodic) {
 	int retVal;
 	uint32_t* currentOutputBuffer;
 
 	// Wait until a buffer is available again
-	while (ece423_video_display_buffer_is_available(display) != 0){}
+	while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
 
 	// Get a pointer to the available buffer
-	currentOutputBuffer = ece423_video_display_get_buffer(display);
+	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
 
 	// Read and decode frame and write it to the buffer
-	DBG_PRINT("Frame #%u:\n", playbackData.currentFrame);
+	DBG_PRINT("Frame #%u:\n", playbackData.processedFrame);
 	retVal = read_next_frame(playbackData.hFile, &playbackData.mpegHeader,
 			&playbackData.mpegFrameBuffer, (void*) currentOutputBuffer);
-	assert(retVal, "Failed to load next frame!");
+	assert(retVal, "Failed to load next frame! %d", retVal);
 
 	// Flag the buffer as written
-	ece423_video_display_register_written_buffer(display);
+	ece423_video_display_register_written_buffer(playbackData.display);
+
+	playbackData.processedFrame++;
 
 	// Flip to next frame
-	if (forcePeriodic) {
-		assert(!switchFrame, "Frame rate too fast, decoding can't keep up!")
-		while (!switchFrame){}  // wait for the frame timer to fire
+	//if (forcePeriodic) {
+	//	assert(!switchFrame, "Frame rate too fast, decoding can't keep up!")
+	//	while (!switchFrame){}  // wait for the frame timer to fire
+	//}
+	//ece423_video_display_switch_frames(playbackData.display);
+	//switchFrame = false;
+	//playbackData.currentFrame++;
+	if (!forcePeriodic) {
+		ece423_video_display_switch_frames(playbackData.display);
+		playbackData.currentFrame++;
 	}
-	ece423_video_display_switch_frames(display);
-	switchFrame = false;
-
-	playbackData.currentFrame++;
 }
 
 static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
@@ -81,6 +93,7 @@ static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
 			playbackData.currentFrame);
 
 	playbackData.currentFrame = frameIndex;
+	playbackData.processedFrame = frameIndex;
 
 	//
 	// Move file to frame
@@ -99,6 +112,7 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
+	playbackData.processedFrame = 0;
 
 	// opening the file
 	playbackData.hFile = Fat_FileOpen(hFat, filename);
@@ -114,17 +128,17 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 	assert(retVal, "Failed to allocate frame buffer");
 }
 
-void previewVideo (ece423_video_display* display) {
+void previewVideo (void) {
 	//startPlaybackFrameTimer();
 
 	if (playbackData.currentFrame < playbackData.mpegHeader.num_frames) {
-		playFrame(display, 0);
+		playFrame(0);
 	}
 
 	//stopPlaybackFrameTimer();
 }
 
-void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames)(void)) {
+void playVideo (int (*functionToStopPlayingFrames)(void)) {
 	DBG_PRINT("Playing the video\n");
 
 	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
@@ -133,12 +147,19 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 		return;
 	}
 
-	startTimer();
-
-	while (playbackData.currentFrame < playbackData.mpegHeader.num_frames
-			&& functionToStopPlayingFrames() == 0) {
-		playFrame(display, FORCE_PERIODIC);
+	if (FORCE_PERIODIC) {
+		startTimer();
 	}
+
+	while (playbackData.processedFrame < playbackData.mpegHeader.num_frames
+			&& functionToStopPlayingFrames() == 0) {
+		playFrame(FORCE_PERIODIC);
+	}
+
+	//
+	// Wait until all frames are outputted
+	//
+	while (playbackData.currentFrame < playbackData.processedFrame);
 
 	//
 	// If there are still frames left to be played
@@ -149,7 +170,9 @@ void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames
 	//
 	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
 
-stopTimer();
+	if (FORCE_PERIODIC) {
+		stopTimer();
+	}
 }
 
 bool isVideoPlaying (void) {
@@ -158,13 +181,16 @@ bool isVideoPlaying (void) {
 
 int fastForwardVideo (void) {
 	int index;
+	uint32_t currentFrame;
 
-	if (playbackData.mpegHeader.num_frames - playbackData.currentFrame < 120) {
+	currentFrame = playbackData.currentFrame;
+
+	if (playbackData.mpegHeader.num_frames - currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames left in the video!\n");
 		return 0;
 	}
 
-	index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
+	index = currentFrame / MAX_IFRAME_OFFSET;
 
 	//
 	// We know we wont go past the end of the
@@ -181,7 +207,7 @@ int fastForwardVideo (void) {
 		// there will be an iframe by 132. This means we will always get
 		// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
 		//
-		if ((int)playbackData.mpegTrailer.iframe_info[index].frame_index - (int)playbackData.currentFrame >= 108) {
+		if ((int)playbackData.mpegTrailer.iframe_info[index].frame_index - (int)currentFrame >= 108) {
 			break;
 		}
 	}
@@ -195,12 +221,15 @@ int fastForwardVideo (void) {
 
 void rewindVideo (void) {
 	int index;
+	uint32_t currentFrame;
 
-	if (playbackData.currentFrame < 120) {
+	currentFrame = playbackData.currentFrame;
+
+	if (currentFrame < 120) {
 		DBG_PRINT("Less than 120 frames from beginning of the video; go to start!\n");
 		index = 0;
 	} else {
-		index = playbackData.currentFrame / MAX_IFRAME_OFFSET;
+		index = currentFrame / MAX_IFRAME_OFFSET;
 
 		while (--index >= 0) {
 			//
@@ -211,7 +240,7 @@ void rewindVideo (void) {
 			// there will be an iframe by 132. This means we will always get
 			// a fast forward by 4.5s - 5.5s (5s +- 0.5s).
 			//
-			if (playbackData.currentFrame - playbackData.mpegTrailer.iframe_info[index].frame_index >= 108) {
+			if (currentFrame - playbackData.mpegTrailer.iframe_info[index].frame_index >= 108) {
 				break;
 			}
 		}
@@ -237,6 +266,7 @@ void closeVideo (void) {
 	unload_mpeg_trailer(&playbackData.mpegTrailer);
 }
 
-int initPlayback (void) {
+int initPlayback (ece423_video_display* display) {
+	playbackData.display = display;
 	return initTimer(FRAME_RATE_MS, &timerFunction);
 }

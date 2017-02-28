@@ -13,13 +13,13 @@
 
 void loadVideo (FAT_HANDLE hFat, char* filename);
 
-void playVideo (ece423_video_display* display, int (*functionToStopPlayingFrames)(void));
+void playVideo (int (*functionToStopPlayingFrames)(void));
 
 int fastForwardVideo (void);
 
 void rewindVideo (void);
 
-void previewVideo (ece423_video_display* display);
+void previewVideo (void);
 
 bool isVideoPlaying (void);
 
@@ -27,6 +27,6 @@ void pauseVideo (void);
 
 void closeVideo (void);
 
-int initPlayback (void);
+int initPlayback (ece423_video_display* display);
 
 #endif /* PLAYBACK_H_ */

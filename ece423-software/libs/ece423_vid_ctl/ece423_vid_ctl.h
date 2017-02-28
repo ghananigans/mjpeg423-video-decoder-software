@@ -77,7 +77,7 @@ ece423_video_display* ece423_video_display_init( char* sgdma_name,
                                            int num_buffers);
 void ece423_video_display_register_written_buffer( ece423_video_display* display );
 int ece423_video_display_buffer_is_available( ece423_video_display* display );
-void ece423_video_display_switch_frames(ece423_video_display* display);
+int ece423_video_display_switch_frames(ece423_video_display* display);
 alt_u32* ece423_video_display_Get_CSR_BASE( ece423_video_display* display );
 alt_u32* ece423_video_display_get_buffer( ece423_video_display* display);
 void ece423_video_display_clear_screen ( ece423_video_display* frame_buffer,

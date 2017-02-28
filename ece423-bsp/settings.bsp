@@ -2,11 +2,11 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Jan 24, 2017 6:26:44 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1485300404788</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Feb 27, 2017 4:45:32 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488231932121</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\ece423-bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
-        <SopcDesignFile>..\..\ece423\ece423_prefab_w2017\ece423_prefab\ECE423_QSYS.sopcinfo</SopcDesignFile>
+        <SopcDesignFile>..\..\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>cpu</Cpu>
         <SchemaVersion>1.9</SchemaVersion>
@@ -911,62 +911,134 @@
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>video_dma_csr</slaveDescriptor>
+                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_csr</slaveDescriptor>
                 <addressRange>0x20101440 - 0x2010145F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>ledr</slaveDescriptor>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_y_csr</slaveDescriptor>
                 <addressRange>0x20101460 - 0x2010147F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>ledg</slaveDescriptor>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cb_csr</slaveDescriptor>
                 <addressRange>0x20101480 - 0x2010149F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>timer_0</slaveDescriptor>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cr_csr</slaveDescriptor>
                 <addressRange>0x201014A0 - 0x201014BF</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>ledr</slaveDescriptor>
+                <addressRange>0x201014C0 - 0x201014DF</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>ledg</slaveDescriptor>
+                <addressRange>0x201014E0 - 0x201014FF</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>timer_0</slaveDescriptor>
+                <addressRange>0x20101500 - 0x2010151F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>video_dma_descriptor_slave</slaveDescriptor>
-                <addressRange>0x201014C0 - 0x201014CF</addressRange>
+                <slaveDescriptor>mdma_from_idct_accel_csr</slaveDescriptor>
+                <addressRange>0x20101520 - 0x2010153F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_csr</slaveDescriptor>
+                <addressRange>0x20101540 - 0x2010155F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>video_dma_csr</slaveDescriptor>
+                <addressRange>0x20101560 - 0x2010157F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101580 - 0x2010158F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_y_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101590 - 0x2010159F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cb_descriptor_slave</slaveDescriptor>
+                <addressRange>0x201015A0 - 0x201015AF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cr_descriptor_slave</slaveDescriptor>
+                <addressRange>0x201015B0 - 0x201015BF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>i2c_sda</slaveDescriptor>
-                <addressRange>0x201014D0 - 0x201014DF</addressRange>
+                <addressRange>0x201015C0 - 0x201015CF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>i2c_scl</slaveDescriptor>
-                <addressRange>0x201014E0 - 0x201014EF</addressRange>
+                <addressRange>0x201015D0 - 0x201015DF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>key</slaveDescriptor>
-                <addressRange>0x201014F0 - 0x201014FF</addressRange>
+                <addressRange>0x201015E0 - 0x201015EF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_from_idct_accel_descriptor_slave</slaveDescriptor>
+                <addressRange>0x201015F0 - 0x201015FF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101600 - 0x2010160F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>video_dma_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101610 - 0x2010161F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sysid</slaveDescriptor>
-                <addressRange>0x20101500 - 0x20101507</addressRange>
+                <addressRange>0x20101620 - 0x20101627</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart</slaveDescriptor>
-                <addressRange>0x20101508 - 0x2010150F</addressRange>
+                <addressRange>0x20101628 - 0x2010162F</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>

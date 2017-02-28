@@ -9,13 +9,16 @@
 #include "../../config.h"
 #include "../../utils.h"
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
+#include "../../idct_accel.h"
+#include "../../ycbcr_to_rgb_accel.h"
+#include <sys/alt_cache.h>
 
 #ifdef TIMING_TESTS
 #include "../../profile.h"
 #endif // #ifdef TIMING_TESTS
 
 #define ERROR_AND_EXIT(str) {		\
-    DBG_PRINT("Error: %s\n", str);	\
+    printf("Error: %s\n", str);		\
     return 0;						\
 }
 
@@ -151,7 +154,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 
 	//read frame payload
 	if (!Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t))) {
-		ERROR_AND_EXIT("cannot read input file");
+		ERROR_AND_EXIT("cannot read frame header");
 	}
 
 	frame_size  = frame_header[0];
@@ -177,7 +180,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifdef TIMING_TEST_SD_READ
 
 	if (!read) {
-		ERROR_AND_EXIT("cannot read input file");
+		ERROR_AND_EXIT("cannot read frame data");
 	}
 
 	//set the Cb and Cr bitstreams to point to the right location
@@ -227,10 +230,18 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	PROFILE_TIME_END(TIMING_TEST_LOSSLESS_CR, frame_type);
 #endif // #ifdef TIMING_TESTS
 
-	//fdct
+#ifdef IDCT_HW_ACCEL
+	//
+	// Flush data cache
+	//
+	alt_dcache_flush_all();
+#endif // #ifdef IDCT_HW_ACCEL
+
+	//idct
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_START(TIMING_TEST_IDCT_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
+
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
@@ -238,6 +249,15 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->YDCAC,
+		    			(uint32_t*)mpegFrameBuffer->Yblock,
+		    			hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+
+		/*
 	for(int b = 0; b < hYb_size*wYb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -248,7 +268,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
-		idct(mpegFrameBuffer->YDCAC[b], mpegFrameBuffer->Yblock[b]);
+    	idct_accel_calculate_buffer((uint32_t*)&mpegFrameBuffer->YDCAC[b],
+    			(uint32_t*)&mpegFrameBuffer->Yblock[b],
+    			sizeof(mpegFrameBuffer->YDCAC[b]), sizeof(mpegFrameBuffer->Yblock[b]));
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
@@ -258,6 +280,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
@@ -271,6 +294,14 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CbDCAC,
+						(uint32_t*)mpegFrameBuffer->Cbblock,
+						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
+		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -281,7 +312,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
-		idct(mpegFrameBuffer->CbDCAC[b], mpegFrameBuffer->Cbblock[b]);
+		idct_accel_calculate_buffer((uint32_t*)&mpegFrameBuffer->CbDCAC[b],
+				(uint32_t*)&mpegFrameBuffer->Cbblock[b],
+				sizeof(mpegFrameBuffer->CbDCAC[b]), sizeof(mpegFrameBuffer->Cbblock[b]));
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
@@ -291,6 +324,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
@@ -304,6 +338,15 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 
+		//
+		// Single call to idct hw accelerator which will push through ALL
+		// pixel data
+		//
+		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CrDCAC,
+						(uint32_t*)mpegFrameBuffer->Crblock,
+						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
+
+		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
@@ -314,7 +357,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 
-		idct(mpegFrameBuffer->CrDCAC[b], mpegFrameBuffer->Crblock[b]);
+		idct_accel_calculate_buffer((uint32_t*)&mpegFrameBuffer->CrDCAC[b],
+				(uint32_t*)&mpegFrameBuffer->Crblock[b],
+				sizeof(mpegFrameBuffer->CrDCAC[b]), sizeof(mpegFrameBuffer->Crblock[b]));
 
 #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
@@ -324,23 +369,45 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifndef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #endif // #ifdef TIMING_TEST_IDCT_ONE_8_X_8_BLOCK
 	}
+*/
 
 #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
 #ifndef TIMING_TEST_IDCT_ONE_FRAME
 		PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT, 0);
 #endif // #ifndef TIMING_TEST_IDCT_ONE_FRAME
 #endif // #ifdef TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT
+
+		//
+		// Wait for all Idct calculations to finish
+		//
+		wait_for_idct_finsh();
 
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_IDCT_ONE_FRAME
 
+#ifndef IDCT_HW_ACCEL
+#ifdef YCBCR_TO_RGB_HW_ACCEL
+	//
+	// Flush data cache
+	//
+	alt_dcache_flush_all();
+#endif // #ifdef YCBCR_TO_RGB_HW_ACCEL
+#endif // #ifdef IDCT_HW_ACCEL
+
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 	PROFILE_TIME_START(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
-	//ybcbr to rgb conversion
-	for (int h = 0; h < hCb_size; h++){
+	ycbcr_to_rgb_accel_calculate_buffer(mpegFrameBuffer->Yblock, mpegFrameBuffer->Crblock, mpegFrameBuffer->Cbblock,
+			outputBuffer, hCb_size, wCb_size, mpegHeader->w_size);
+
+	//
+	// Wait for module to finish
+	//
+	wait_for_ycbcr_to_rgb_finsh();
+
+	/*for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {
 			int b = h * wCb_size + w;
 #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
@@ -359,6 +426,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK
 		}
 	}
+*/
 
 #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);

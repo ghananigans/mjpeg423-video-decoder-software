@@ -2,9 +2,9 @@
  * system.h - SOPC Builder system and BSP software package information
  *
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
- * SOPC Builder design path: ../../ece423/ECE423_QSYS.sopcinfo
+ * SOPC Builder design path: ../../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Mon Feb 27 11:57:23 EST 2017
+ * Generated: Tue Feb 28 12:23:05 EST 2017
  */
 
 /*

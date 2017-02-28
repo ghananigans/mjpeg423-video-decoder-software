@@ -2,9 +2,9 @@
  * alt_sys_init.c - HAL initialization source
  *
  * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
- * SOPC Builder design path: ../../ece423/ECE423_QSYS.sopcinfo
+ * SOPC Builder design path: ../../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Thu Feb 16 21:01:41 EST 2017
+ * Generated: Tue Feb 28 12:23:05 EST 2017
  */
 
 /*

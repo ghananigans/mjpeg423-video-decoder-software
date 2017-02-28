@@ -208,7 +208,7 @@ CRT0 :=
 SYS_LIB :=
 
 # Define path to the root of the BSP.
-BSP_ROOT_DIR := ..\ece423-bsp
+BSP_ROOT_DIR := ..\bsp
 
 # List of application specific include directories, library directories and library names
 APP_INCLUDE_DIRS :=
@@ -219,7 +219,7 @@ APP_LIBRARY_NAMES :=
 BUILD_PRE_PROCESS :=
 BUILD_POST_PROCESS :=
 
-QUARTUS_PROJECT_DIR := C:/Users/ggowripa/Documents/PortableGit/ece423/ece423_prefab_w2017/ece423_prefab/
+QUARTUS_PROJECT_DIR := C:/Users/ggowripa/Documents/PortableGit/ece423/
 
 
 #END GENERATED

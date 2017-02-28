@@ -1,10 +1,10 @@
 /*
  * alt_sys_init.c - HAL initialization source
  *
- * Machine generated for CPU 'cpu' in SOPC Builder design 'ECE423_QSYS'
+ * Machine generated for CPU 'cpu_0' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: ../../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Feb 28 12:23:05 EST 2017
+ * Generated: Tue Feb 28 13:35:15 EST 2017
  */
 
 /*
@@ -60,6 +60,8 @@
 
 #include "altera_nios2_gen2_irq.h"
 #include "altera_avalon_jtag_uart.h"
+#include "altera_avalon_mailbox_simple.h"
+#include "altera_avalon_mutex.h"
 #include "altera_avalon_sysid_qsys.h"
 #include "altera_avalon_timer.h"
 #include "altera_msgdma.h"
@@ -68,17 +70,14 @@
  * Allocate the device storage
  */
 
-ALTERA_NIOS2_GEN2_IRQ_INSTANCE ( CPU, cpu);
-ALTERA_AVALON_JTAG_UART_INSTANCE ( JTAG_UART, jtag_uart);
+ALTERA_NIOS2_GEN2_IRQ_INSTANCE ( CPU_0, cpu_0);
+ALTERA_AVALON_JTAG_UART_INSTANCE ( JTAG_UART_0, jtag_uart_0);
+ALTERA_AVALON_MAILBOX_SIMPLE_INSTANCE ( MAILBOX_SIMPLE_CPU0_TO_CPU1, mailbox_simple_cpu0_to_cpu1);
+ALTERA_AVALON_MAILBOX_SIMPLE_INSTANCE ( MAILBOX_SIMPLE_CPU1_TO_CPU0, mailbox_simple_cpu1_to_cpu0);
+ALTERA_AVALON_MUTEX_INSTANCE ( MUTEX_0, mutex_0);
 ALTERA_AVALON_SYSID_QSYS_INSTANCE ( SYSID, sysid);
-ALTERA_AVALON_TIMER_INSTANCE ( TIMER_0, timer_0);
-ALTERA_AVALON_TIMER_INSTANCE ( TIMER_1, timer_1);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_FROM_IDCT_ACCEL, MDMA_FROM_IDCT_ACCEL_CSR, MDMA_FROM_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_from_idct_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_FROM_YCBCR_TO_RGB_ACCEL, MDMA_FROM_YCBCR_TO_RGB_ACCEL_CSR, MDMA_FROM_YCBCR_TO_RGB_ACCEL_DESCRIPTOR_SLAVE, mdma_from_ycbcr_to_rgb_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_IDCT_ACCEL, MDMA_TO_IDCT_ACCEL_CSR, MDMA_TO_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_to_idct_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CB, MDMA_TO_YCBCR_TO_RGB_ACCEL_CB_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CB_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_cb);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CR_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CR_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_cr);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_Y, MDMA_TO_YCBCR_TO_RGB_ACCEL_Y_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_Y_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_y);
+ALTERA_AVALON_TIMER_INSTANCE ( TIMER_0_0, timer_0_0);
+ALTERA_AVALON_TIMER_INSTANCE ( TIMER_0_1, timer_0_1);
 ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( VIDEO_DMA, VIDEO_DMA_CSR, VIDEO_DMA_DESCRIPTOR_SLAVE, video_dma);
 
 /*
@@ -91,7 +90,7 @@ ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( VIDEO_DMA, VIDEO_DMA_CSR, VIDEO_DM
 
 void alt_irq_init ( const void* base )
 {
-    ALTERA_NIOS2_GEN2_IRQ_INIT ( CPU, cpu);
+    ALTERA_NIOS2_GEN2_IRQ_INIT ( CPU_0, cpu_0);
     alt_irq_cpu_enable_interrupts();
 }
 
@@ -102,15 +101,12 @@ void alt_irq_init ( const void* base )
 
 void alt_sys_init( void )
 {
-    ALTERA_AVALON_TIMER_INIT ( TIMER_0, timer_0);
-    ALTERA_AVALON_TIMER_INIT ( TIMER_1, timer_1);
-    ALTERA_AVALON_JTAG_UART_INIT ( JTAG_UART, jtag_uart);
+    ALTERA_AVALON_TIMER_INIT ( TIMER_0_0, timer_0_0);
+    ALTERA_AVALON_TIMER_INIT ( TIMER_0_1, timer_0_1);
+    ALTERA_AVALON_JTAG_UART_INIT ( JTAG_UART_0, jtag_uart_0);
+    ALTERA_AVALON_MAILBOX_SIMPLE_INIT ( MAILBOX_SIMPLE_CPU0_TO_CPU1, mailbox_simple_cpu0_to_cpu1);
+    ALTERA_AVALON_MAILBOX_SIMPLE_INIT ( MAILBOX_SIMPLE_CPU1_TO_CPU0, mailbox_simple_cpu1_to_cpu0);
+    ALTERA_AVALON_MUTEX_INIT ( MUTEX_0, mutex_0);
     ALTERA_AVALON_SYSID_QSYS_INIT ( SYSID, sysid);
-    ALTERA_MSGDMA_INIT ( MDMA_FROM_IDCT_ACCEL, mdma_from_idct_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_FROM_YCBCR_TO_RGB_ACCEL, mdma_from_ycbcr_to_rgb_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_IDCT_ACCEL, mdma_to_idct_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CB, mdma_to_ycbcr_to_rgb_accel_cb);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CR, mdma_to_ycbcr_to_rgb_accel_cr);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_Y, mdma_to_ycbcr_to_rgb_accel_y);
     ALTERA_MSGDMA_INIT ( VIDEO_DMA, video_dma);
 }

@@ -172,6 +172,7 @@ C_SRCS += libs/mjpeg423/libbmp/encode_bmp.c
 C_SRCS += libs/mjpeg423/libnsbmp/decode_bmp.c
 C_SRCS += libs/mjpeg423/libnsbmp/libnsbmp.c
 C_SRCS += libs/mjpeg423/sample_main.c
+C_SRCS += mailbox.c
 CXX_SRCS :=
 ASM_SRCS :=
 

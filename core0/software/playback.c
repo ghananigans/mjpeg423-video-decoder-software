@@ -6,9 +6,9 @@
  */
 
 #include "playback.h"
-#include "config.h"
+#include "../../common/config.h"
 
-#include "utils.h"
+#include "../../common/utils.h"
 #include "lib_exts/mpeg423/mpeg423_decoder_ext.h"
 #include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
 #include "system.h"

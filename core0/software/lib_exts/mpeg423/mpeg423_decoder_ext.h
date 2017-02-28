@@ -9,7 +9,7 @@
 #define MPEG423_DECODER_EXT_H_
 
 #include "../../libs/ece423_sd/ece423_sd.h"
-#include "../../libs/mjpeg423/common/mjpeg423_types.h"
+#include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
 #include <stdint.h>
 
 #define DBG_PRINT_LIB_EXT()

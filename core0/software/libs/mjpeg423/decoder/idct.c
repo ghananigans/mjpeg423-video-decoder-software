@@ -10,8 +10,8 @@
 #include "mjpeg423_decoder.h"
 #include "../common/dct_math.h"
 #include "../common/util.h"
-#include "../../../config.h"
-#include "../../../utils.h"
+#include "../../../../../common/config.h"
+#include "../../../../../common/utils.h"
 
 #ifndef NULL_DCT
 

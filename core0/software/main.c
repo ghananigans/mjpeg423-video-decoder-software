@@ -17,13 +17,11 @@
 #include <system.h>
 #include <stdint.h>
 
-#include "config.h"
-#include "utils.h"
+#include "../../common/config.h"
+#include "../../common/utils.h"
 
 #include "playback.h"
 #include "key_controls.h"
-#include "idct_accel.h"
-#include "ycbcr_to_rgb_accel.h"
 #include <io.h>
 
 #include "libs/ece423_sd/ece423_sd.h"
@@ -202,7 +200,7 @@ static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_
 }
 
 int main() {
-	printf("Application Starting...\n");
+	printf("Application Starting (Master Core - Core 0)...\n");
 
 	// File System
 	FAT_HANDLE hFAT;
@@ -259,19 +257,6 @@ int main() {
 	//
 	retVal = initKeyIrq();
 	assert(retVal, "Failed to init keys");
-
-	//
-	// Init IDCT accel
-	//
-	retVal = init_idct_accel();
-	assert(retVal, "Failed to init idct accel!\n");
-	//test_idct();
-
-	//
-	// Init ycbcr_to_rgb accell
-	//
-	retVal = init_ycbcr_to_rgb_accel();
-	assert(retVal, "Failed to ycbcr_to_rgb accel!\n");
 
 	//
 	// Init playback

@@ -6,7 +6,7 @@
  */
 
 #include "ycbcr_to_rgb_accel.h"
-#include "utils.h"
+#include "../../common/utils.h"
 
 #ifdef YCBCR_TO_RGB_HW_ACCEL
 #include <system.h>
@@ -16,7 +16,7 @@
 #include <altera_msgdma_csr_regs.h>
 #include <stdbool.h>
 
-#include "mdma.h"
+#include "../../common/mdma.h"
 
 static mdma_t from_accel;
 static mdma_t to_accel_y;

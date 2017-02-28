@@ -8,7 +8,7 @@
 #ifndef MDMA_H_
 #define MDMA_H_
 
-#include "altera_msgdma.h"
+//#include "altera_msgdma.h"
 
 typedef struct mdma {
 	alt_msgdma_standard_descriptor desc;

@@ -15,10 +15,31 @@
  */
 
 #include <stdio.h>
+#include "../../common/config.h"
+#include "../../common/utils.h"
+#include "idct_accel.h"
+#include "ycbcr_to_rgb_accel.h"
 
 int main()
 {
-  printf("Hello from Nios II!\n");
+	int retVal;
+
+	printf("Application Starting (Slave Core - Core 1)...\n");
+
+	//
+	// Init IDCT accel
+	//
+	retVal = init_idct_accel();
+	assert(retVal, "Failed to init idct accel!\n");
+	//test_idct_accel();
+
+	//
+	// Init ycbcr_to_rgb accell
+	//
+	retVal = init_ycbcr_to_rgb_accel();
+	assert(retVal, "Failed to ycbcr_to_rgb accel!\n");
+
+	while(1);
 
   return 0;
 }

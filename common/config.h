@@ -39,7 +39,7 @@
 //
 // Comment this out to remove print statements
 //
-//#define DEBUG_PRINT_ENABLED
+#define DEBUG_PRINT_ENABLED
 
 //
 // Uncomment to not use the HW accelerator for idct calculations

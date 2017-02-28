@@ -6,11 +6,11 @@
  */
 
 #include "mpeg423_decoder_ext.h"
-#include "../../config.h"
-#include "../../utils.h"
+#include "../../../../common/config.h"
+#include "../../../../common/utils.h"
 #include "../../libs/mjpeg423/decoder/mjpeg423_decoder.h"
-#include "../../idct_accel.h"
-#include "../../ycbcr_to_rgb_accel.h"
+//#include "../../idct_accel.h"
+//#include "../../ycbcr_to_rgb_accel.h"
 #include <sys/alt_cache.h>
 
 #ifdef TIMING_TESTS
@@ -234,7 +234,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	//
 	// Flush data cache
 	//
-	alt_dcache_flush_all();
+	//alt_dcache_flush_all();
 #endif // #ifdef IDCT_HW_ACCEL
 
 	//idct
@@ -253,9 +253,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		// Single call to idct hw accelerator which will push through ALL
 		// pixel data
 		//
-		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->YDCAC,
-		    			(uint32_t*)mpegFrameBuffer->Yblock,
-		    			hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
+		//idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->YDCAC,
+		//    			(uint32_t*)mpegFrameBuffer->Yblock,
+		//    			hYb_size*wYb_size*sizeof(dct_block_t), hYb_size*wYb_size*sizeof(color_block_t));
 
 		/*
 	for(int b = 0; b < hYb_size*wYb_size; b++) {
@@ -298,9 +298,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		// Single call to idct hw accelerator which will push through ALL
 		// pixel data
 		//
-		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CbDCAC,
-						(uint32_t*)mpegFrameBuffer->Cbblock,
-						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
+		//idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CbDCAC,
+		//				(uint32_t*)mpegFrameBuffer->Cbblock,
+		//				hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
 		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
 
@@ -342,9 +342,9 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		// Single call to idct hw accelerator which will push through ALL
 		// pixel data
 		//
-		idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CrDCAC,
-						(uint32_t*)mpegFrameBuffer->Crblock,
-						hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
+		//idct_accel_calculate_buffer((uint32_t*)mpegFrameBuffer->CrDCAC,
+		//				(uint32_t*)mpegFrameBuffer->Crblock,
+		//				hCb_size*wCb_size*sizeof(dct_block_t), hCb_size*wCb_size*sizeof(color_block_t));
 
 		/*
 	for(int b = 0; b < hCb_size*wCb_size; b++) {
@@ -380,7 +380,7 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 		//
 		// Wait for all Idct calculations to finish
 		//
-		wait_for_idct_finsh();
+		//wait_for_idct_finsh();
 
 #ifdef TIMING_TEST_IDCT_ONE_FRAME
 	PROFILE_TIME_END(TIMING_TEST_IDCT_ONE_FRAME, 0);
@@ -399,13 +399,13 @@ int read_next_frame (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader, MPEG_W
 	PROFILE_TIME_START(TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME, 0);
 #endif // #ifdef TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME
 
-	ycbcr_to_rgb_accel_calculate_buffer(mpegFrameBuffer->Yblock, mpegFrameBuffer->Crblock, mpegFrameBuffer->Cbblock,
-			outputBuffer, hCb_size, wCb_size, mpegHeader->w_size);
+	//ycbcr_to_rgb_accel_calculate_buffer(mpegFrameBuffer->Yblock, mpegFrameBuffer->Crblock, mpegFrameBuffer->Cbblock,
+	//		outputBuffer, hCb_size, wCb_size, mpegHeader->w_size);
 
 	//
 	// Wait for module to finish
 	//
-	wait_for_ycbcr_to_rgb_finsh();
+	//wait_for_ycbcr_to_rgb_finsh();
 
 	/*for (int h = 0; h < hCb_size; h++){
 		for (int w = 0; w < wCb_size; w++) {

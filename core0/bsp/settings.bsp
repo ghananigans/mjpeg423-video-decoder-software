@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Feb 28, 2017 1:35:13 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1488306913970</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Feb 28, 2017 3:03:26 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488312206634</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core0\bsp</BspGeneratedLocation>
-        <BspSettingsFile>settings.bsp</BspSettingsFile>
+        <BspSettingsFile>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core0\bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\..\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>cpu_0</Cpu>

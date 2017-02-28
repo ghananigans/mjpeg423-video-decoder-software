@@ -6,7 +6,7 @@
  */
 
 #include "idct_accel.h"
-#include "utils.h"
+#include "../../common/utils.h"
 #include <stdbool.h>
 
 #ifdef IDCT_HW_ACCEL
@@ -16,15 +16,13 @@
 #include <altera_msgdma_descriptor_regs.h>
 #include <altera_msgdma_csr_regs.h>
 
-#include "mdma.h"
+#include "../../common/mdma.h"
 
 #define DESC_CONTROL_FROM_IDCT_ACCEL      (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_TRANSFER_COMPLETE_IRQ_MASK | ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 #define DESC_CONTROL_TO_IDCT_ACCEL        (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 
 static mdma_t from_accel;
 static mdma_t to_accel;
-
-static int volatile working_count = 0;
 
 static void dmaToIrq (void* isr_context){
 	IOWR_ALTERA_MSGDMA_CSR_STATUS(MDMA_TO_IDCT_ACCEL_CSR_BASE, 0x1);

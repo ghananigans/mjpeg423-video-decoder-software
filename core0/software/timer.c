@@ -6,8 +6,8 @@
  */
 
 #include "timer.h"
-#include "utils.h"
-#include "system.h"
+#include "../../common/utils.h"
+#include <system.h>
 #include <sys/alt_irq.h>
 #include "altera_avalon_timer_regs.h"
 #include <stdio.h>

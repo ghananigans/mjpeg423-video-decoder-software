@@ -8,7 +8,7 @@
 #ifndef YCBR_TO_RGB_ACCEL_H_
 #define YCBR_TO_RGB_ACCEL_H_
 
-#include "libs/mjpeg423/decoder/mjpeg423_decoder.h"
+#include "../../common/libs/mjpeg423/common/mjpeg423_types.h"
 
 int init_ycbcr_to_rgb_accel (void);
 void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* crBlock, color_block_t* cbBlock,

@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Feb 28, 2017 3:03:26 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1488312206634</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Feb 28, 2017 8:38:35 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488332315764</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core0\bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core0\bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\..\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
@@ -886,6 +886,30 @@
                 <Enabled>false</Enabled>
                 <Group xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
         </Setting>
+        <LinkerRegion>
+                <regionName>lpddr2</regionName>
+                <memoryName>lpddr2</memoryName>
+                <offset>0</offset>
+                <size>268435456</size>
+                <baseAddress>0x0</baseAddress>
+                <addressRange>0x00000000 - 0x0FFFFFFF</addressRange>
+        </LinkerRegion>
+        <LinkerRegion>
+                <regionName>reset</regionName>
+                <memoryName>sram</memoryName>
+                <offset>0</offset>
+                <size>32</size>
+                <baseAddress>0x20080000</baseAddress>
+                <addressRange>0x20080000 - 0x2008001F</addressRange>
+        </LinkerRegion>
+        <LinkerRegion>
+                <regionName>sram</regionName>
+                <memoryName>sram</memoryName>
+                <offset>32</offset>
+                <size>524256</size>
+                <baseAddress>0x20080020</baseAddress>
+                <addressRange>0x20080020 - 0x200FFFFF</addressRange>
+        </LinkerRegion>
         <MemoryMap>
                 <slaveDescriptor>lpddr2</slaveDescriptor>
                 <addressRange>0x00000000 - 0x1FFFFFFF</addressRange>
@@ -899,92 +923,134 @@
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>sd_cont</slaveDescriptor>
-                <addressRange>0x20101000 - 0x201013FF</addressRange>
-                <addressSpan>1024</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
                 <slaveDescriptor>timer_0_1</slaveDescriptor>
-                <addressRange>0x20101400 - 0x2010143F</addressRange>
+                <addressRange>0x20101000 - 0x2010103F</addressRange>
                 <addressSpan>64</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
+                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_csr</slaveDescriptor>
+                <addressRange>0x20101040 - 0x2010105F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_y_csr</slaveDescriptor>
+                <addressRange>0x20101060 - 0x2010107F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_cb_csr</slaveDescriptor>
+                <addressRange>0x20101080 - 0x2010109F</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_cr_csr</slaveDescriptor>
+                <addressRange>0x201010A0 - 0x201010BF</addressRange>
+                <addressSpan>32</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
                 <slaveDescriptor>ledr</slaveDescriptor>
-                <addressRange>0x20101440 - 0x2010145F</addressRange>
+                <addressRange>0x201010C0 - 0x201010DF</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>ledg</slaveDescriptor>
-                <addressRange>0x20101460 - 0x2010147F</addressRange>
+                <addressRange>0x201010E0 - 0x201010FF</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_0_0</slaveDescriptor>
-                <addressRange>0x20101480 - 0x2010149F</addressRange>
+                <addressRange>0x20101100 - 0x2010111F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>video_dma_csr</slaveDescriptor>
-                <addressRange>0x201014A0 - 0x201014BF</addressRange>
+                <addressRange>0x20101120 - 0x2010113F</addressRange>
                 <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>mailbox_simple_cpu1_to_cpu0</slaveDescriptor>
-                <addressRange>0x201014C0 - 0x201014CF</addressRange>
+                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101140 - 0x2010114F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>mailbox_simple_cpu0_to_cpu1</slaveDescriptor>
-                <addressRange>0x201014D0 - 0x201014DF</addressRange>
+                <slaveDescriptor>mdma_to_idct_accel_y_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101150 - 0x2010115F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_cb_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101160 - 0x2010116F</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mdma_to_idct_accel_cr_descriptor_slave</slaveDescriptor>
+                <addressRange>0x20101170 - 0x2010117F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>i2c_sda</slaveDescriptor>
-                <addressRange>0x201014E0 - 0x201014EF</addressRange>
+                <addressRange>0x20101180 - 0x2010118F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>i2c_scl</slaveDescriptor>
-                <addressRange>0x201014F0 - 0x201014FF</addressRange>
+                <addressRange>0x20101190 - 0x2010119F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>key</slaveDescriptor>
-                <addressRange>0x20101500 - 0x2010150F</addressRange>
+                <addressRange>0x201011A0 - 0x201011AF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>video_dma_descriptor_slave</slaveDescriptor>
-                <addressRange>0x20101510 - 0x2010151F</addressRange>
+                <addressRange>0x201011B0 - 0x201011BF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mailbox_simple_cpu0_to_cpu1</slaveDescriptor>
+                <addressRange>0x201011C0 - 0x201011CF</addressRange>
+                <addressSpan>16</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
+                <slaveDescriptor>mailbox_simple_cpu1_to_cpu0</slaveDescriptor>
+                <addressRange>0x201011D0 - 0x201011DF</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>mutex_0</slaveDescriptor>
-                <addressRange>0x20101520 - 0x20101527</addressRange>
+                <addressRange>0x201011E0 - 0x201011E7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sysid</slaveDescriptor>
-                <addressRange>0x20101528 - 0x2010152F</addressRange>
+                <addressRange>0x201011E8 - 0x201011EF</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart_0</slaveDescriptor>
-                <addressRange>0x20101530 - 0x20101537</addressRange>
+                <addressRange>0x201011F0 - 0x201011F7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>

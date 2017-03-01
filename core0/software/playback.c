@@ -9,8 +9,8 @@
 #include "../../common/config.h"
 
 #include "../../common/utils.h"
-#include "lib_exts/mpeg423/mpeg423_decoder_ext.h"
-#include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
+#include "../../common/lib_exts/mpeg423/mpeg423_decoder_ext.h"
+#include "../../common/libs/ece423_vid_ctl/ece423_vid_ctl.h"
 #include "system.h"
 #include "sys/alt_alarm.h"
 #include "timer.h"

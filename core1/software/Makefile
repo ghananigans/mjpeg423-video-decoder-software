@@ -142,9 +142,7 @@ ACDS_VERSION := 15.1
 ELF := core1-software.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS += main.c
-C_SRCS += idct_accel.c
-C_SRCS += ycbcr_to_rgb_accel.c
+C_SRCS := main.c
 CXX_SRCS :=
 ASM_SRCS :=
 
@@ -182,7 +180,7 @@ SYS_LIB :=
 BSP_ROOT_DIR := ../bsp
 
 # List of application specific include directories, library directories and library names
-APP_INCLUDE_DIRS := ../bsp
+APP_INCLUDE_DIRS := ../../common
 APP_LIBRARY_DIRS :=
 APP_LIBRARY_NAMES :=
 

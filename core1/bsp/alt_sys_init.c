@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Feb 28 14:11:03 EST 2017
+ * Generated: Tue Feb 28 20:31:19 EST 2017
  */
 
 /*
@@ -64,7 +64,6 @@
 #include "altera_avalon_mutex.h"
 #include "altera_avalon_sysid_qsys.h"
 #include "altera_avalon_timer.h"
-#include "altera_msgdma.h"
 
 /*
  * Allocate the device storage
@@ -78,12 +77,6 @@ ALTERA_AVALON_MUTEX_INSTANCE ( MUTEX_0, mutex_0);
 ALTERA_AVALON_SYSID_QSYS_INSTANCE ( SYSID, sysid);
 ALTERA_AVALON_TIMER_INSTANCE ( TIMER_1_0, timer_1_0);
 ALTERA_AVALON_TIMER_INSTANCE ( TIMER_1_1, timer_1_1);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_FROM_IDCT_ACCEL, MDMA_FROM_IDCT_ACCEL_CSR, MDMA_FROM_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_from_idct_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_FROM_YCBCR_TO_RGB_ACCEL, MDMA_FROM_YCBCR_TO_RGB_ACCEL_CSR, MDMA_FROM_YCBCR_TO_RGB_ACCEL_DESCRIPTOR_SLAVE, mdma_from_ycbcr_to_rgb_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_IDCT_ACCEL, MDMA_TO_IDCT_ACCEL_CSR, MDMA_TO_IDCT_ACCEL_DESCRIPTOR_SLAVE, mdma_to_idct_accel);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CB, MDMA_TO_YCBCR_TO_RGB_ACCEL_CB_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CB_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_cb);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CR_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_CR_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_cr);
-ALTERA_MSGDMA_CSR_DESCRIPTOR_SLAVE_INSTANCE ( MDMA_TO_YCBCR_TO_RGB_ACCEL_Y, MDMA_TO_YCBCR_TO_RGB_ACCEL_Y_CSR, MDMA_TO_YCBCR_TO_RGB_ACCEL_Y_DESCRIPTOR_SLAVE, mdma_to_ycbcr_to_rgb_accel_y);
 
 /*
  * Initialize the interrupt controller devices
@@ -113,10 +106,4 @@ void alt_sys_init( void )
     ALTERA_AVALON_MAILBOX_SIMPLE_INIT ( MAILBOX_SIMPLE_CPU1_TO_CPU0, mailbox_simple_cpu1_to_cpu0);
     ALTERA_AVALON_MUTEX_INIT ( MUTEX_0, mutex_0);
     ALTERA_AVALON_SYSID_QSYS_INIT ( SYSID, sysid);
-    ALTERA_MSGDMA_INIT ( MDMA_FROM_IDCT_ACCEL, mdma_from_idct_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_FROM_YCBCR_TO_RGB_ACCEL, mdma_from_ycbcr_to_rgb_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_IDCT_ACCEL, mdma_to_idct_accel);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CB, mdma_to_ycbcr_to_rgb_accel_cb);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_CR, mdma_to_ycbcr_to_rgb_accel_cr);
-    ALTERA_MSGDMA_INIT ( MDMA_TO_YCBCR_TO_RGB_ACCEL_Y, mdma_to_ycbcr_to_rgb_accel_y);
 }

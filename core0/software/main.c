@@ -23,8 +23,10 @@
 #include "playback.h"
 #include "key_controls.h"
 #include <io.h>
+#include "idct_accel.h"
+#include "ycbcr_to_rgb_accel.h"
 
-#include "libs/ece423_sd/ece423_sd.h"
+
 
 #ifdef TIMING_TESTS
 #include "profile.h"
@@ -228,24 +230,6 @@ int main() {
 #endif // #ifdef TIMING_TEST_EMPTY
 
 	//
-	// Init the SD
-	//
-	retVal = SDLIB_Init(SD_CONT_BASE);
-	assert(retVal, "SDLIB_Init failed!")
-
-	//
-	// Mount the FAT file system
-	//
-	hFAT = Fat_Mount();
-	assert(hFAT, "Fat_Mount failed!")
-
-	//
-	// Get handle to browse FAT file system
-	//
-	retVal = Fat_FileBrowseBegin(hFAT, &FatBrowseHandle);
-	assert(retVal, "Fat_FileBrowseBegin failed!")
-
-	//
 	// Init video display using ece423 video api
 	//
 	ece423_video_display* display = ece423_video_display_init(
@@ -259,12 +243,25 @@ int main() {
 	assert(retVal, "Failed to init keys");
 
 	//
+	// Init IDCT accel
+	//
+	retVal = init_idct_accel();
+	assert(retVal, "Failed to init idct accel!\n");
+	//test_idct_accel();
+
+	//
+	// Init ycbcr_to_rgb accell
+	//
+	retVal = init_ycbcr_to_rgb_accel();
+	assert(retVal, "Failed to ycbcr_to_rgb accel!\n");
+
+	//
 	// Init playback
 	//
 	retVal = initPlayback(display);
 	assert(retVal, "Failed to init playback");
 
-	DBG_PRINT("Initialization complete!\n");
+	DBG_PRINT("Initialization complete on Core 0 (Master Core)!\n");
 
 	doWork(hFAT, &FatBrowseHandle, display);
 

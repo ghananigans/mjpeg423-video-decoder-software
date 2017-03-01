@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Feb 28, 2017 3:03:00 PM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1488312180913</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Feb 28, 2017 8:37:55 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488332275439</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core1\bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core1\bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>C:\Users\ggowripa\Documents\PortableGit\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
@@ -886,6 +886,30 @@
                 <Enabled>false</Enabled>
                 <Group xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
         </Setting>
+        <LinkerRegion>
+                <regionName>lpddr2</regionName>
+                <memoryName>lpddr2</memoryName>
+                <offset>268435456</offset>
+                <size>268435456</size>
+                <baseAddress>0x10000000</baseAddress>
+                <addressRange>0x10000000 - 0x1FFFFFFF</addressRange>
+        </LinkerRegion>
+        <LinkerRegion>
+                <regionName>reset</regionName>
+                <memoryName>sram</memoryName>
+                <offset>0</offset>
+                <size>32</size>
+                <baseAddress>0x20080000</baseAddress>
+                <addressRange>0x20080000 - 0x2008001F</addressRange>
+        </LinkerRegion>
+        <LinkerRegion>
+                <regionName>sram</regionName>
+                <memoryName>sram</memoryName>
+                <offset>32</offset>
+                <size>524256</size>
+                <baseAddress>0x20080020</baseAddress>
+                <addressRange>0x20080020 - 0x200FFFFF</addressRange>
+        </LinkerRegion>
         <MemoryMap>
                 <slaveDescriptor>lpddr2</slaveDescriptor>
                 <addressRange>0x00000000 - 0x1FFFFFFF</addressRange>
@@ -893,104 +917,38 @@
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
+                <slaveDescriptor>sd_cont</slaveDescriptor>
+                <addressRange>0x20001000 - 0x200013FF</addressRange>
+                <addressSpan>1024</addressSpan>
+                <attributes/>
+        </MemoryMap>
+        <MemoryMap>
                 <slaveDescriptor>timer_1_1</slaveDescriptor>
-                <addressRange>0x20001000 - 0x2000103F</addressRange>
+                <addressRange>0x20001400 - 0x2000143F</addressRange>
                 <addressSpan>64</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>timer_1_0</slaveDescriptor>
-                <addressRange>0x20001040 - 0x2000107F</addressRange>
+                <addressRange>0x20001440 - 0x2000147F</addressRange>
                 <addressSpan>64</addressSpan>
                 <attributes>timer</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_csr</slaveDescriptor>
-                <addressRange>0x20001080 - 0x2000109F</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_y_csr</slaveDescriptor>
-                <addressRange>0x200010A0 - 0x200010BF</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cr_csr</slaveDescriptor>
-                <addressRange>0x200010C0 - 0x200010DF</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cb_csr</slaveDescriptor>
-                <addressRange>0x200010E0 - 0x200010FF</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_from_idct_accel_csr</slaveDescriptor>
-                <addressRange>0x20001100 - 0x2000111F</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_idct_accel_csr</slaveDescriptor>
-                <addressRange>0x20001120 - 0x2000113F</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
                 <slaveDescriptor>mailbox_simple_cpu1_to_cpu0</slaveDescriptor>
-                <addressRange>0x20001140 - 0x2000114F</addressRange>
+                <addressRange>0x20001480 - 0x2000148F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>mailbox_simple_cpu0_to_cpu1</slaveDescriptor>
-                <addressRange>0x20001150 - 0x2000115F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_from_ycbcr_to_rgb_accel_descriptor_slave</slaveDescriptor>
-                <addressRange>0x20001160 - 0x2000116F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_y_descriptor_slave</slaveDescriptor>
-                <addressRange>0x20001170 - 0x2000117F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cr_descriptor_slave</slaveDescriptor>
-                <addressRange>0x20001180 - 0x2000118F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_ycbcr_to_rgb_accel_cb_descriptor_slave</slaveDescriptor>
-                <addressRange>0x20001190 - 0x2000119F</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_from_idct_accel_descriptor_slave</slaveDescriptor>
-                <addressRange>0x200011A0 - 0x200011AF</addressRange>
-                <addressSpan>16</addressSpan>
-                <attributes/>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>mdma_to_idct_accel_descriptor_slave</slaveDescriptor>
-                <addressRange>0x200011B0 - 0x200011BF</addressRange>
+                <addressRange>0x20001490 - 0x2000149F</addressRange>
                 <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>jtag_uart_1</slaveDescriptor>
-                <addressRange>0x200011C0 - 0x200011C7</addressRange>
+                <addressRange>0x200014A0 - 0x200014A7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
         </MemoryMap>
@@ -1002,13 +960,13 @@
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>mutex_0</slaveDescriptor>
-                <addressRange>0x20101520 - 0x20101527</addressRange>
+                <addressRange>0x201011E0 - 0x201011E7</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
                 <slaveDescriptor>sysid</slaveDescriptor>
-                <addressRange>0x20101528 - 0x2010152F</addressRange>
+                <addressRange>0x201011E8 - 0x201011EF</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes/>
         </MemoryMap>

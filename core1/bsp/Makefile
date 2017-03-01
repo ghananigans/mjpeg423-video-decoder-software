@@ -249,13 +249,6 @@ altera_avalon_timer_driver_C_LIB_SRCS := \
 	$(altera_avalon_timer_driver_SRCS_ROOT)/src/altera_avalon_timer_ts.c \
 	$(altera_avalon_timer_driver_SRCS_ROOT)/src/altera_avalon_timer_vars.c
 
-# altera_msgdma_driver sources root 
-altera_msgdma_driver_SRCS_ROOT := drivers
-
-# altera_msgdma_driver sources 
-altera_msgdma_driver_C_LIB_SRCS := \
-	$(altera_msgdma_driver_SRCS_ROOT)/src/altera_msgdma.c
-
 # altera_nios2_gen2_hal_driver sources root 
 altera_nios2_gen2_hal_driver_SRCS_ROOT := HAL
 
@@ -360,7 +353,6 @@ COMPONENT_C_LIB_SRCS += \
 	$(altera_avalon_mutex_driver_C_LIB_SRCS) \
 	$(altera_avalon_sysid_qsys_driver_C_LIB_SRCS) \
 	$(altera_avalon_timer_driver_C_LIB_SRCS) \
-	$(altera_msgdma_driver_C_LIB_SRCS) \
 	$(altera_nios2_gen2_hal_driver_C_LIB_SRCS) \
 	$(hal_C_LIB_SRCS)
 

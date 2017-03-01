@@ -3,7 +3,7 @@
 # Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
 # SOPC Builder design path: C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_QSYS.sopcinfo
 #
-# Generated: Tue Feb 28 14:11:03 EST 2017
+# Generated: Tue Feb 28 20:31:19 EST 2017
 
 # DO NOT MODIFY THIS FILE
 #

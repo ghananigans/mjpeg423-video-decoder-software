@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu_0' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: ../../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Feb 28 13:35:15 EST 2017
+ * Generated: Tue Feb 28 20:38:37 EST 2017
  */
 
 /*
@@ -50,7 +50,7 @@
 
 MEMORY
 {
-    lpddr2 : ORIGIN = 0x0, LENGTH = 536870912
+    lpddr2 : ORIGIN = 0x0, LENGTH = 268435456
     reset : ORIGIN = 0x20080000, LENGTH = 32
     sram : ORIGIN = 0x20080020, LENGTH = 524256
 }
@@ -382,7 +382,7 @@ SECTIONS
 /*
  * Don't override this, override the __alt_stack_* symbols instead.
  */
-__alt_data_end = 0x20000000;
+__alt_data_end = 0x10000000;
 
 /*
  * The next two symbols define the location of the default stack.  You can
@@ -398,4 +398,4 @@ PROVIDE( __alt_stack_limit   = __alt_stack_base );
  * Override this symbol to put the heap in a different memory.
  */
 PROVIDE( __alt_heap_start    = end );
-PROVIDE( __alt_heap_limit    = 0x20000000 );
+PROVIDE( __alt_heap_limit    = 0x10000000 );

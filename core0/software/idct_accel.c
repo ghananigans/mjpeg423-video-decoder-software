@@ -22,7 +22,9 @@
 #define DESC_CONTROL_TO_IDCT_ACCEL        (ALTERA_MSGDMA_DESCRIPTOR_CONTROL_GO_MASK)
 
 static mdma_t from_accel;
-static mdma_t to_accel;
+static mdma_t to_accel_y;
+static mdma_t to_accel_cb;
+static mdma_t to_accel_cr;
 
 static void dmaToIrq (void* isr_context){
 	IOWR_ALTERA_MSGDMA_CSR_STATUS(MDMA_TO_IDCT_ACCEL_CSR_BASE, 0x1);
@@ -93,8 +95,14 @@ int init_idct_accel (void){
 	from_accel.dev = alt_msgdma_open(MDMA_FROM_IDCT_ACCEL_CSR_NAME);
 	assert(from_accel.dev, "MDMA from failed to open\n");
 
-	to_accel.dev   = alt_msgdma_open(MDMA_TO_IDCT_ACCEL_CSR_NAME);
-	assert(to_accel.dev, "MDMA to failed to open\n");
+	to_accel_y.dev   = alt_msgdma_open(MDMA_TO_IDCT_ACCEL_Y_CSR_NAME);
+	assert(to_accel_y.dev, "MDMA to failed to open\n");
+
+	to_accel_cb.dev   = alt_msgdma_open(MDMA_TO_IDCT_ACCEL_CB_CSR_NAME);
+	assert(to_accel_cb.dev, "MDMA to failed to open\n");
+
+	to_accel_cr.dev   = alt_msgdma_open(MDMA_TO_IDCT_ACCEL_CR_CSR_NAME);
+	assert(to_accel_cr.dev, "MDMA to failed to open\n");
 
 	//
 	// Interrupt Setup

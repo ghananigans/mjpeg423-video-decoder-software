@@ -14,7 +14,7 @@
  *
  */
 
-#include <stdio.h>
+/*#include <stdio.h>
 #include "../../common/config.h"
 #include "../../common/utils.h"
 #include "../../common/libs/ece423_sd/ece423_sd.h"
@@ -247,4 +247,4 @@ int main()
 	while(1);
 
   return 0;
-}
+}*/

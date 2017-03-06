@@ -101,7 +101,7 @@ ACDS_VERSION := 15.1
 # BUILD_NUMBER: 185
 
 SETTINGS_FILE := settings.bsp
-SOPC_FILE := C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_QSYS.sopcinfo
+SOPC_FILE := C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
 
 #-------------------------------------------------------------------------------
 #                             TOOL & COMMAND DEFINITIONS

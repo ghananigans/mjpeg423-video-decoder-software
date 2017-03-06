@@ -1,9 +1,9 @@
 # memory.gdb - GDB memory region definitions
 #
 # Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
-# SOPC Builder design path: C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_QSYS.sopcinfo
+# SOPC Builder design path: C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
 #
-# Generated: Tue Feb 28 20:31:19 EST 2017
+# Generated: Mon Mar 06 17:26:01 EST 2017
 
 # DO NOT MODIFY THIS FILE
 #

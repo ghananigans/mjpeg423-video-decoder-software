@@ -14,11 +14,13 @@
  *
  */
 
-/*#include <stdio.h>
-#include "../../common/config.h"
-#include "../../common/utils.h"
-#include "../../common/libs/ece423_sd/ece423_sd.h"
-#include "../../common/lib_exts/mpeg423/mpeg423_decoder_ext.h"
+#include <stdio.h>
+#include "common/config.h"
+#include "common/utils.h"
+#include "libs/ece423_sd/ece423_sd.h"
+#include "common/lib_ext/mpeg423/mpeg423_decoder_ext.h"
+#include "common/mailbox/mailbox.h"
+#include <system.h>
 
 FILE_CONTEXT fileContext;
 MPEG_FILE_HEADER mpegHeader;
@@ -108,7 +110,7 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 
 	// opening the file
 	hFile = Fat_FileOpen(hFat, filename);
-	assert(playbackData.hFile, "Error in opening file!\n")
+	assert(hFile, "Error in opening file!\n")
 
 	load_mpeg_header(hFile, &mpegHeader);
 	assert(mpegHeader.w_size == DISPLAY_WIDTH, "Video file width unrecognized\n");
@@ -242,9 +244,18 @@ int main()
 	retVal = Fat_FileBrowseBegin(hFAT, &FatBrowseHandle);
 	assert(retVal, "Fat_FileBrowseBegin failed!");
 
+	//
+	// Init Mailbox
+	//
+	retVal = init_send_mailbox(MAILBOX_SIMPLE_CPU1_TO_CPU0_NAME);
+	//assert(retVal, "Failed to init send mailbox!");
+
+	//retVal = init_recv_mailbox(MAILBOX_SIMPLE_CPU0_TO_CPU1_NAME);
+	//assert(retVal, "Failed to init recv mailbox!");
+
 	DBG_PRINT("Initialization complete on Core 1 (Slave Core)!\n");
 
 	while(1);
 
   return 0;
-}*/
+}

@@ -86,11 +86,11 @@ ACDS_VERSION := 15.1
 
 # Quartus Generated JDI File. Required for resolving node instance ID's with 
 # design component names. 
-JDI_FILE := C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_C5G.jdi
+JDI_FILE := C:/Users/ggowripa/Documents/ece423/ECE423_C5G.jdi
 
 # Qsys--generated SOPCINFO file. Required for resolving node instance ID's with 
 # design component names. 
-SOPCINFO_FILE := C:/Users/ggowripa/Documents/PortableGit/ece423/ECE423_QSYS.sopcinfo
+SOPCINFO_FILE := C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
 
 # Big-Endian operation. 
 # setting BIG_ENDIAN is false

@@ -47,7 +47,7 @@ typedef int bool;
 #include <sys/alt_cache.h>
 #include "io.h"
 #include "alt_types.h"  // alt_u32
-#include "altera_avalon_pio_regs.h" //IOWR_ALTERA_AVALON_PIO_DATA
+//#include "altera_avalon_pio_regs.h" //IOWR_ALTERA_AVALON_PIO_DATA
 #include "sys/alt_irq.h"  // interrupt
 #include "sys/alt_alarm.h" // time tick function (alt_nticks(), alt_ticks_per_second())
 #include "sys/alt_timestamp.h" 

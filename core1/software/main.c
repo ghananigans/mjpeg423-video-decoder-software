@@ -27,7 +27,7 @@ MPEG_FILE_HEADER mpegHeader;
 MPEG_FILE_TRAILER mpegTrailer = {0,0};
 FAT_FILE_HANDLE hFile;
 FAT_HANDLE hFAT;
-FAT_BROWSE_HANDLE* FatBrowseHandle;
+FAT_BROWSE_HANDLE FatBrowseHandle;
 
 typedef struct FRAME_OFFSETS_STRUCT {
 	uint32_t cbOffset;
@@ -108,6 +108,8 @@ void unload_mpeg_trailer (MPEG_FILE_TRAILER* mpegTrailer) {
 void loadVideo (FAT_HANDLE hFat, char* filename) {
 	int retVal;
 
+	DBG_PRINT("Loading next video...\n");
+
 	// opening the file
 	hFile = Fat_FileOpen(hFat, filename);
 	assert(hFile, "Error in opening file!\n")
@@ -166,9 +168,11 @@ static void readFrame(void * buffer) {
 	//send message that LD Y is done
 }
 
-static void findLoadNextVideo (void* buffer) {
+static void findNextVideo (void) {
 	int retVal;
 	bool fileFound;
+
+	DBG_PRINT("Finding next video...\n");
 
 	//
 	// Main loop
@@ -189,8 +193,7 @@ static void findLoadNextVideo (void* buffer) {
 		//
 		// Try to find the next available MPG file
 		//
-		DBG_PRINT("Finding next file to play\n");
-		while (Fat_FileBrowseNext(FatBrowseHandle, &fileContext)) {
+		while (Fat_FileBrowseNext(&FatBrowseHandle, &fileContext)) {
 			//
 			// Check if the file is a .MPG file
 			//
@@ -212,10 +215,16 @@ static void findLoadNextVideo (void* buffer) {
 		// TODO: Don't make this assumption
 		// End of FAT system, so loop back to beginning
 		DBG_PRINT("Reached end of file list; Re-Begin File browse\n");
-		retVal = Fat_FileBrowseBegin(hFAT, FatBrowseHandle);
+		retVal = Fat_FileBrowseBegin(hFAT, &FatBrowseHandle);
 		assert(retVal, "Fat_FileBrowseBegin failed!");
 	}
 
+	DBG_PRINT("File Found; File Name is: %s, file size %d\n", Fat_GetFileName(&fileContext),
+					fileContext.FileSize);
+}
+
+static void findLoadNextVideo (void* buffer) {
+	findNextVideo();
 	loadVideo(hFAT, Fat_GetFileName(&fileContext));
 	readFrame(buffer);
 }
@@ -248,10 +257,10 @@ int main()
 	// Init Mailbox
 	//
 	retVal = init_send_mailbox(MAILBOX_SIMPLE_CPU1_TO_CPU0_NAME);
-	//assert(retVal, "Failed to init send mailbox!");
+	assert(retVal, "Failed to init send mailbox!");
 
-	//retVal = init_recv_mailbox(MAILBOX_SIMPLE_CPU0_TO_CPU1_NAME);
-	//assert(retVal, "Failed to init recv mailbox!");
+	retVal = init_recv_mailbox(MAILBOX_SIMPLE_CPU0_TO_CPU1_NAME);
+	assert(retVal, "Failed to init recv mailbox!");
 
 	DBG_PRINT("Initialization complete on Core 1 (Slave Core)!\n");
 

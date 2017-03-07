@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Mar 07 11:32:13 EST 2017
+ * Generated: Tue Mar 07 13:38:48 EST 2017
  */
 
 /*
@@ -67,10 +67,10 @@
 
 #define LPDDR2_REGION_BASE 0x10000000
 #define LPDDR2_REGION_SPAN 268435456
-#define RESET_REGION_BASE 0x20080000
+#define RESET_REGION_BASE 0x200c0000
 #define RESET_REGION_SPAN 32
-#define SRAM_REGION_BASE 0x20080020
-#define SRAM_REGION_SPAN 524256
+#define SRAM_REGION_BASE 0x200c0020
+#define SRAM_REGION_SPAN 262112
 
 
 /*

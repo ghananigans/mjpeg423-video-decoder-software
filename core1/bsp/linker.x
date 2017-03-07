@@ -4,7 +4,7 @@
  * Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
  * SOPC Builder design path: C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Mar 07 11:32:13 EST 2017
+ * Generated: Tue Mar 07 13:38:48 EST 2017
  */
 
 /*
@@ -51,8 +51,8 @@
 MEMORY
 {
     lpddr2 : ORIGIN = 0x10000000, LENGTH = 268435456
-    reset : ORIGIN = 0x20080000, LENGTH = 32
-    sram : ORIGIN = 0x20080020, LENGTH = 524256
+    reset : ORIGIN = 0x200c0000, LENGTH = 32
+    sram : ORIGIN = 0x200c0020, LENGTH = 262112
 }
 
 /* Define symbols for each memory base-address */

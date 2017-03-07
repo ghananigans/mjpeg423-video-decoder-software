@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Mar 7, 2017 11:32:11 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1488904331679</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Mar 7, 2017 1:38:46 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488911926870</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\ggowripa\Documents\ece423-nios-II\core1\bsp</BspGeneratedLocation>
-        <BspSettingsFile>C:\Users\ggowripa\Documents\ece423-nios-II\core1\bsp\settings.bsp</BspSettingsFile>
+        <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>C:\Users\ggowripa\Documents\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>cpu_1</Cpu>
@@ -897,18 +897,18 @@
         <LinkerRegion>
                 <regionName>reset</regionName>
                 <memoryName>sram</memoryName>
-                <offset>0</offset>
+                <offset>262144</offset>
                 <size>32</size>
-                <baseAddress>0x20080000</baseAddress>
-                <addressRange>0x20080000 - 0x2008001F</addressRange>
+                <baseAddress>0x200c0000</baseAddress>
+                <addressRange>0x200C0000 - 0x200C001F</addressRange>
         </LinkerRegion>
         <LinkerRegion>
                 <regionName>sram</regionName>
                 <memoryName>sram</memoryName>
-                <offset>32</offset>
-                <size>524256</size>
-                <baseAddress>0x20080020</baseAddress>
-                <addressRange>0x20080020 - 0x200FFFFF</addressRange>
+                <offset>262176</offset>
+                <size>262112</size>
+                <baseAddress>0x200c0020</baseAddress>
+                <addressRange>0x200C0020 - 0x200FFFFF</addressRange>
         </LinkerRegion>
         <MemoryMap>
                 <slaveDescriptor>lpddr2</slaveDescriptor>

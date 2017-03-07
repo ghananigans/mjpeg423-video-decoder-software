@@ -1,5 +1,6 @@
 #include "mailbox.h"
-#include "altera_avalon_mailbox_simple.h"
+#include <altera_avalon_mailbox_simple.h>
+#include <sys/alt_cache.h>
 
 
 static altera_avalon_mailbox_dev *sendMailbox = 0;
@@ -16,6 +17,8 @@ static uint32_t mailboxBuffers[4][2] = {
 };
 
 static void send (void) {
+	alt_dcache_flush((void *) &sendBuffer[counter], sizeof(mailbox_msg_t));
+
 	altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL);
 
 	counter = (counter + 1) & 0x3;

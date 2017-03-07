@@ -229,6 +229,16 @@ static void findLoadNextVideo (void* buffer) {
 	readFrame(buffer);
 }
 
+static void doWork (void) {
+	DBG_PRINT("Waiting for request\n");
+
+	mailbox_msg_t * msg = recv_msg();
+
+	DBG_PRINT("Got msg type: %d\n", msg->header.type);
+
+	send_done_read_next_frame(55, 43);
+}
+
 int main()
 {
 	int retVal;
@@ -264,7 +274,7 @@ int main()
 
 	DBG_PRINT("Initialization complete on Core 1 (Slave Core)!\n");
 
-	while(1);
+	doWork();
 
   return 0;
 }

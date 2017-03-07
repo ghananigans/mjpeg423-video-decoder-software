@@ -2,10 +2,10 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Mar 7, 2017 11:24:33 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1488903873505</BspGeneratedUnixTimeStamp>
-        <BspGeneratedLocation>C:\Users\ggowripa\Documents\PortableGit\ece423-nios-II\core0\bsp</BspGeneratedLocation>
-        <BspSettingsFile>C:\Users\ggowripa\Documents\ece423-nios-II\core0\bsp\settings.bsp</BspSettingsFile>
+        <BspGeneratedTimeStamp>Mar 7, 2017 1:38:50 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1488911930213</BspGeneratedUnixTimeStamp>
+        <BspGeneratedLocation>C:\Users\ggowripa\Documents\ece423-nios-II\core0\bsp</BspGeneratedLocation>
+        <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\..\ece423\ECE423_QSYS.sopcinfo</SopcDesignFile>
         <JdiFile>default</JdiFile>
         <Cpu>cpu_0</Cpu>
@@ -906,9 +906,9 @@
                 <regionName>sram</regionName>
                 <memoryName>sram</memoryName>
                 <offset>32</offset>
-                <size>524256</size>
+                <size>262112</size>
                 <baseAddress>0x20080020</baseAddress>
-                <addressRange>0x20080020 - 0x200FFFFF</addressRange>
+                <addressRange>0x20080020 - 0x200BFFFF</addressRange>
         </LinkerRegion>
         <MemoryMap>
                 <slaveDescriptor>lpddr2</slaveDescriptor>

@@ -52,8 +52,8 @@ int main () {
 	//
 	// Init playback
 	//
-	//retVal = initPlayback(display);
-	//assert(retVal, "Failed to init playback");
+	retVal = initPlayback(display);
+	assert(retVal, "Failed to init playback");
 
 	//
 	// Init Mailbox
@@ -65,6 +65,15 @@ int main () {
 	assert(retVal, "Failed to init recv mailbox!");
 
 	DBG_PRINT("Initialization complete on Core 0 (Master Core)!\n");
+
+	DBG_PRINT("SENT OK_TO_LDY\n");
+	send_ok_to_ld_y(55);
+
+	DBG_PRINT("Waiting for request\n");
+
+	mailbox_msg_t * msg = recv_msg();
+
+	DBG_PRINT("Got msg type: %d\n", msg->header.type);
 
 	while(1);
 

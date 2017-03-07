@@ -166,6 +166,7 @@ C_SRCS += common/mailbox/mailbox.c
 C_SRCS += libs/ece423_vid_ctl/ece423_vid_ctl.c
 C_SRCS += libs/ece423_vid_ctl/i2c.c
 C_SRCS += idct_ycbcr_to_rgb_accel.c
+C_SRCS += playback.c
 CXX_SRCS :=
 ASM_SRCS :=
 

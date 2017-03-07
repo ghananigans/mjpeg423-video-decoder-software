@@ -17,7 +17,7 @@ static uint32_t mailboxBuffers[4][2] = {
 };
 
 static void send (void) {
-	alt_dcache_flush((void *) &sendBuffer[counter], sizeof(mailbox_msg_t));
+	alt_dcache_flush_all();
 
 	altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL);
 

@@ -22,7 +22,101 @@
 #include "key_controls.h"
 #include "idct_ycbcr_to_rgb_accel.h"
 #include "common/mailbox/mailbox.h"
+#include "playback.h"
 
+#define PLAY_PAUSE_VIDEO_BUTTON		(1)
+#define LOAD_NEXT_VIDEO_BUTTON		(2)
+#define FAST_FORWARD_VIDEO_BUTTON	(4)
+#define REWIND_VIDEO_BUTTON			(8)
+
+static void doWork (void) {
+	int retVal;
+	int keyPressed;
+	bool currentlyPlaying;
+
+	while (1) {
+		//
+		// Load video related info
+		//
+		DBG_PRINT("Loading video...\n");
+		loadVideo();
+
+		//
+		// Play video and handle
+		// push button presses
+		//
+		while (1) {
+			DBG_PRINT("Press Push Button 0 to play video\n");
+
+			keyPressed = waitForButtonPress();
+			DBG_PRINT("Key pressed %d\n", keyPressed);
+
+			currentlyPlaying = isVideoPlaying();
+
+			if (keyPressed & PLAY_PAUSE_VIDEO_BUTTON) {\
+				DBG_PRINT("Play/Pause button pressed\n");
+				DBG_PRINT("Currently %s, Going to %s\n",
+						currentlyPlaying ? "Playing" : "Paused",
+						currentlyPlaying ? "Pause" : "Play");
+
+				if (currentlyPlaying)
+				{
+					// Currently Playing so go to beginning of this loop to wait for
+					// Push button 0 to be pressed.
+					// If not currently playing (paused) continue on to play
+					pauseVideo();
+					continue;
+				}
+			} else if (keyPressed & LOAD_NEXT_VIDEO_BUTTON) {
+				DBG_PRINT("Load next video button pressed\n");
+
+				break;
+			} else if (keyPressed & FAST_FORWARD_VIDEO_BUTTON) {
+				DBG_PRINT("Fast forward button pressed\n");
+				continue; // NULL IMPLEMENTATION
+
+				/*retVal = fastForwardVideo();
+
+				if (!retVal) {
+					//
+					// Close to the end of the video
+					// Just stop the video
+					//
+					pauseVideo();
+					continue;
+				}
+
+				// Preview the video
+				previewVideo();
+
+				if (!currentlyPlaying) {
+					// If not currently playing, then go back to
+					// waiting for user input
+					continue;
+				}*/
+			} else if (keyPressed & REWIND_VIDEO_BUTTON) {
+				DBG_PRINT("Rewind button pressed\n");
+				continue; // NULL IMPLEMENTATION
+
+				/*rewindVideo();
+				previewVideo();
+
+				if (!currentlyPlaying) {
+					// If not currently playing, then go back to
+					// waiting for user input
+					continue;
+				}(*/
+			}
+
+			DBG_PRINT("Playing video\n");
+			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
+
+			DBG_PRINT("Video stopped\n");
+		}
+
+		closeVideo();
+	}
+}
 
 int main () {
 	int retVal;
@@ -66,16 +160,7 @@ int main () {
 
 	DBG_PRINT("Initialization complete on Core 0 (Master Core)!\n");
 
-	DBG_PRINT("SENT OK_TO_LDY\n");
-	send_ok_to_ld_y(55);
-
-	DBG_PRINT("Waiting for request\n");
-
-	mailbox_msg_t * msg = recv_msg();
-
-	DBG_PRINT("Got msg type: %d\n", msg->header.type);
-
-	while(1);
+	doWork();
 
 	return 0;
 }
@@ -84,11 +169,6 @@ int main () {
 #ifdef TIMING_TESTS
 #include "profile.h"
 #endif // #ifdef TIMING_TESTS
-
-#define PLAY_PAUSE_VIDEO_BUTTON		(1)
-#define LOAD_NEXT_VIDEO_BUTTON		(2)
-#define FAST_FORWARD_VIDEO_BUTTON	(4)
-#define REWIND_VIDEO_BUTTON			(8)
 
 
 static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_video_display *display) {

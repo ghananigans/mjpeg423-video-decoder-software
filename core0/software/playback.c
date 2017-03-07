@@ -14,6 +14,8 @@
 #include "system.h"
 #include "sys/alt_alarm.h"
 #include "timer.h"
+#include "common/mailbox/mailbox.h"
+#include "idct_ycbcr_to_rgb_accel.h"
 
 #define MAX_IFRAME_OFFSET (24)
 #define NUM_H_BLOCKS (DISPLAY_HEIGHT / 8)
@@ -34,6 +36,8 @@ static color_block_t Crblock[NUM_CR_COLOR_BLOCKS];
 static dct_block_t YDCAC[NUM_Y_DCT_BLOCKS];
 static dct_block_t CbDCAC[NUM_CB_DCT_BLOCKS];
 static dct_block_t CrDCAC[NUM_CR_DCT_BLOCKS];
+static MPEG_FILE_HEADER mpegHeader;
+static MPEG_FILE_TRAILER mpegTrailer;
 
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
@@ -195,7 +199,8 @@ void rewindVideo (void) {
  */
 
 void loadVideo (void) {
-	int retVal;
+	mailbox_msg_t * msg;
+	uint32_t* currentOutputBuffer;
 
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
@@ -211,6 +216,50 @@ void loadVideo (void) {
 		&CbDCAC, // CbDCAC
 		&CrDCAC // CrDCAC
 	};
+
+	while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
+	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
+
+	DBG_PRINT("Send msg to slave to read next file (and do LD Y)\n");
+	send_read_next_file (&mpegHeader, &mpegTrailer, &YBitstream, &YDCAC);
+
+	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
+	msg = recv_msg();
+	assert(msg->header.type == DONE_READ_NEXT_FRAME,
+			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
+	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
+
+	uint8_t * ptr = &YBitstream + msg->type_data.done_read_next_frame.cbOffset;
+	lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
+			&CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+
+	ptr += msg->type_data.done_read_next_frame.crOffset;
+	lossless_decode(NUM_CR_DCT_BLOCKS, ptr,
+			&CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+
+	alt_dcache_flush_all();
+	idct_accel_calculate_buffer_cb(&CbDCAC, sizeof(CbDCAC));
+	idct_accel_calculate_buffer_cr(&CrDCAC, sizeof(CrDCAC));
+
+	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
+	msg = recv_msg();
+	assert(msg->header.type == DONE_LD_Y,
+			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
+	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
+	idct_accel_calculate_buffer_y(&YDCAC, sizeof(YDCAC));
+
+	ycbcr_to_rgb_accel_get_results(currentOutputBuffer, DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
+	DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
+	wait_for_ycbcr_to_rgb_finsh();
+	DBG_PRINT("Done ycbcr_to_rgb\n");
+
+	ece423_video_display_register_written_buffer(playbackData.display);
+	playbackData.processedFrame++;
+
+	ece423_video_display_switch_frames(playbackData.display);
+	playbackData.currentFrame++;
+
+	DBG_PRINT("Done readfile\n");
 }
 
 void previewVideo (void) {
@@ -280,3 +329,4 @@ int initPlayback (ece423_video_display* display) {
 	playbackData.display = display;
 	return initTimer(FRAME_RATE_MS, &timerFunction);
 }
+

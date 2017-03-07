@@ -16,6 +16,8 @@ typedef struct mailbox_msg{
 
 	union {
 		struct {
+			void * mpegHeader;
+			void * mpegTrailer;
 			void * bitstream;
 			void * yDADC;
 		} read_next_file;
@@ -23,6 +25,7 @@ typedef struct mailbox_msg{
 		struct {
 			uint32_t cbOffset;
 			uint32_t crOffset;
+			uint8_t frameType;
 		} done_read_next_frame;
 
 		struct {
@@ -34,6 +37,8 @@ typedef struct mailbox_msg{
 		} done_ld_y;
 
 		struct {
+			void * mpegHeader;
+			void * yBitstream;
 			void * yDADC;
 		} ok_to_ld_y;
 
@@ -44,8 +49,8 @@ typedef struct mailbox_msg{
 int init_send_mailbox (char * csr_name);
 int init_recv_mailbox (char * csr_name);
 mailbox_msg_t * recv_msg (void);
-void send_read_next_file (void * bitstream, void * yDADC);
-void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset);
+void send_read_next_file (void * mpegHeader, void * mpegTrailer, void * bitstream, void * yDADC);
+void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset, uint8_t frameType);
 void send_ok_to_read_next_frame (void * bitstream);
 void send_done_ld_y (void * yDADC);
 void send_ok_to_ld_y (void * yDADC);

@@ -143,11 +143,29 @@ ELF := ece423.elf
 
 # Paths to C, C++, and assembly source files.
 C_SRCS += main.c
-C_SRCS += playback.c
 C_SRCS += key_controls.c
 C_SRCS += timer.c
 C_SRCS += profile.c
-C_SRCS += mailbox.c
+C_SRCS += common/libs/mjpeg423/common/tables.c
+C_SRCS += common/libs/mjpeg423/common/util.c
+C_SRCS += common/libs/mjpeg423/decoder/idct.c
+C_SRCS += common/libs/mjpeg423/decoder/lossless_decode.c
+C_SRCS += common/libs/mjpeg423/decoder/mjpeg423_decoder.c
+C_SRCS += common/libs/mjpeg423/decoder/ycbcr_to_rgb.c
+C_SRCS += common/libs/mjpeg423/encoder/fdct.c
+C_SRCS += common/libs/mjpeg423/encoder/lossless_encode.c
+C_SRCS += common/libs/mjpeg423/encoder/mjpeg423_encoder.c
+C_SRCS += common/libs/mjpeg423/encoder/quantize.c
+C_SRCS += common/libs/mjpeg423/encoder/rgb_to_ycbcr.c
+C_SRCS += common/libs/mjpeg423/libbmp/bmpfile.c
+C_SRCS += common/libs/mjpeg423/libbmp/encode_bmp.c
+C_SRCS += common/libs/mjpeg423/libnsbmp/decode_bmp.c
+C_SRCS += common/libs/mjpeg423/libnsbmp/libnsbmp.c
+C_SRCS += common/libs/mjpeg423/sample_main.c
+C_SRCS += common/mailbox/mailbox.c
+C_SRCS += libs/ece423_vid_ctl/ece423_vid_ctl.c
+C_SRCS += libs/ece423_vid_ctl/i2c.c
+C_SRCS += idct_ycbcr_to_rgb_accel.c
 CXX_SRCS :=
 ASM_SRCS :=
 

@@ -16,18 +16,62 @@
 #include <stdio.h>
 #include <system.h>
 #include <stdint.h>
-
-#include "../../common/config.h"
-#include "../../common/utils.h"
-
-#include "playback.h"
+#include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
+#include "common/config.h"
+#include "common/utils.h"
 #include "key_controls.h"
-#include <io.h>
-#include "idct_accel.h"
-#include "ycbcr_to_rgb_accel.h"
+#include "idct_ycbcr_to_rgb_accel.h"
+#include "common/mailbox/mailbox.h"
 
 
+int main () {
+	int retVal;
 
+	printf("Application Starting (Master Core - Core 0)...\n");
+
+	//
+	// Init video display using ece423 video api
+	//
+	ece423_video_display* display = ece423_video_display_init(
+		VIDEO_DMA_CSR_NAME, DISPLAY_HEIGHT, DISPLAY_WIDTH, NUM_OUTPUT_BUFFERS);
+	assert(display, "Video display init failed!");
+
+	//
+	// Init Keypress interrupts
+	//
+	retVal = initKeyIrq();
+	assert(retVal, "Failed to init keys");
+
+	//
+	// Init IDCT accel
+	//
+	retVal = init_idct_ycbcr_to_rgb_accel();
+	assert(retVal, "Failed to init idct and ycbcr_to_rgb accel!\n");
+	//test_idct_accel();
+
+	//
+	// Init playback
+	//
+	//retVal = initPlayback(display);
+	//assert(retVal, "Failed to init playback");
+
+	//
+	// Init Mailbox
+	//
+	retVal = init_send_mailbox(MAILBOX_SIMPLE_CPU0_TO_CPU1_NAME);
+	assert(retVal, "Failed to init send mailbox!");
+
+	retVal = init_recv_mailbox(MAILBOX_SIMPLE_CPU1_TO_CPU0_NAME);
+	assert(retVal, "Failed to init recv mailbox!");
+
+	DBG_PRINT("Initialization complete on Core 0 (Master Core)!\n");
+
+	while(1);
+
+	return 0;
+}
+
+/*
 #ifdef TIMING_TESTS
 #include "profile.h"
 #endif // #ifdef TIMING_TESTS
@@ -36,6 +80,7 @@
 #define LOAD_NEXT_VIDEO_BUTTON		(2)
 #define FAST_FORWARD_VIDEO_BUTTON	(4)
 #define REWIND_VIDEO_BUTTON			(8)
+
 
 static void doWork (FAT_HANDLE hFAT, FAT_BROWSE_HANDLE* FatBrowseHandle, ece423_video_display *display) {
 	FILE_CONTEXT fileContext;
@@ -267,3 +312,4 @@ int main() {
 
 	return 0;
 }
+*/

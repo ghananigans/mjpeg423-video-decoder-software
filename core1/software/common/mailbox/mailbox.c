@@ -43,24 +43,27 @@ mailbox_msg_t * recv_msg (void) {
 	return ((mailbox_msg_t * ) retData[1]);
 }
 
-void send_read_next_file (void * bitstream, void * yDADC) {
+void send_read_next_file (void * mpegHeader, void * mpegTrailer, void * bitstream, void * yDADC) {
 	// Set mailbox msg type
 	sendBuffer[counter].header.type = READ_NEXT_FILE;
 
 	// Mailbox msg type specific data
+	sendBuffer[counter].type_data.read_next_file.mpegHeader = mpegHeader;
+	sendBuffer[counter].type_data.read_next_file.mpegTrailer = mpegTrailer;
 	sendBuffer[counter].type_data.read_next_file.bitstream = bitstream;
 	sendBuffer[counter].type_data.read_next_file.yDADC = yDADC;
 
 	send();
 }
 
-void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset) {
+void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset, uint8_t frameType) {
 	// Set mailbox msg type
 	sendBuffer[counter].header.type = DONE_READ_NEXT_FRAME;
 
 	// Mailbox msg type specific data
 	sendBuffer[counter].type_data.done_read_next_frame.cbOffset = cbOffset;
 	sendBuffer[counter].type_data.done_read_next_frame.crOffset = crOffset;
+	sendBuffer[counter].type_data.done_read_next_frame.frameType = frameType;
 
 	send();
 }

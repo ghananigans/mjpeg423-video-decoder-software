@@ -23,11 +23,10 @@
 #include <system.h>
 
 FILE_CONTEXT fileContext;
-MPEG_FILE_HEADER mpegHeader;
-MPEG_FILE_TRAILER mpegTrailer = {0,0};
 FAT_FILE_HANDLE hFile;
 FAT_HANDLE hFAT;
 FAT_BROWSE_HANDLE FatBrowseHandle;
+uint8_t lastFrameType;
 
 typedef struct FRAME_OFFSETS_STRUCT {
 	uint32_t cbOffset;
@@ -105,7 +104,7 @@ void unload_mpeg_trailer (MPEG_FILE_TRAILER* mpegTrailer) {
 	mpegTrailer->iframe_info = NULL;
 }
 
-void loadVideo (FAT_HANDLE hFat, char* filename) {
+void loadVideo (FAT_HANDLE hFat, char* filename, MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer) {
 	int retVal;
 
 	DBG_PRINT("Loading next video...\n");
@@ -114,23 +113,18 @@ void loadVideo (FAT_HANDLE hFat, char* filename) {
 	hFile = Fat_FileOpen(hFat, filename);
 	assert(hFile, "Error in opening file!\n")
 
-	load_mpeg_header(hFile, &mpegHeader);
-	assert(mpegHeader.w_size == DISPLAY_WIDTH, "Video file width unrecognized\n");
-	assert(mpegHeader.h_size == DISPLAY_HEIGHT, "Video file height unrecognized\n");
+	load_mpeg_header(hFile, mpegHeader);
+	assert(mpegHeader->w_size == DISPLAY_WIDTH, "Video file width unrecognized\n");
+	assert(mpegHeader->h_size == DISPLAY_HEIGHT, "Video file height unrecognized\n");
 
-	unload_mpeg_trailer(&mpegTrailer); //unload the previous trailer
-	load_mpeg_trailer(hFile, &mpegHeader, &mpegTrailer);
+	unload_mpeg_trailer(mpegTrailer); //unload the previous trailer
+	load_mpeg_trailer(hFile, mpegHeader, mpegTrailer);
 }
 
 FRAME_OFFSETS readFrameData (void * buffer) {
 	uint32_t frame_header[4];
     uint32_t Ysize, Cbsize, frame_size, frame_type;
     FRAME_OFFSETS retStruct;
-
-    int hCb_size = mpegHeader.h_size/8;           //number of chrominance blocks
-    int wCb_size = mpegHeader.w_size/8;
-    int hYb_size = mpegHeader.h_size/8;           //number of luminance blocks. Same as chrominance in the sample app
-    int wYb_size = mpegHeader.w_size/8;
 
 	//read frame payload
     bool read = Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t));
@@ -147,25 +141,14 @@ FRAME_OFFSETS readFrameData (void * buffer) {
 	read = Fat_FileRead(hFile, buffer, frame_size - 4 * sizeof(uint32_t));
 	assert(read, "cannot read frame data");
 
+	// Keep track of last frame type
+	lastFrameType = frame_type;
+
 	//set the Cb and Cr bitstreams to point to the right location
 	retStruct.cbOffset = Ysize;
 	retStruct.crOffset = Ysize + Cbsize;
 
 	return retStruct;
-}
-
-static void readFrame(void * buffer) {
-	FRAME_OFFSETS frameOffsets;
-
-	frameOffsets = readFrameData(buffer);
-
-	// Send data through mailbox to Master so it can do LDCR/LDCB w/ frameOffsets data
-
-	// wait for mailbox to say start LD Y
-
-	// Do ldY
-
-	//send message that LD Y is done
 }
 
 static void findNextVideo (void) {
@@ -223,20 +206,70 @@ static void findNextVideo (void) {
 					fileContext.FileSize);
 }
 
-static void findLoadNextVideo (void* buffer) {
+static void findLoadNextVideo (MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer) {
 	findNextVideo();
-	loadVideo(hFAT, Fat_GetFileName(&fileContext));
-	readFrame(buffer);
+	loadVideo(hFAT, Fat_GetFileName(&fileContext), mpegHeader, mpegTrailer);
 }
 
 static void doWork (void) {
-	DBG_PRINT("Waiting for request\n");
+	mailbox_msg_t * msg;
+	FRAME_OFFSETS frameOffsets;
+	uint32_t val;
+	MPEG_FILE_HEADER* mpegHeader;
 
-	mailbox_msg_t * msg = recv_msg();
+	while (1) {
+		DBG_PRINT("Waiting for request\n");
+		msg = recv_msg();
+		DBG_PRINT("Got msg type: %d\n", msg->header.type);
 
-	DBG_PRINT("Got msg type: %d\n", msg->header.type);
+		switch(msg->header.type) {
+			case READ_NEXT_FILE:
+				DBG_PRINT("READ_NEXT_FILE msg received\n");
 
-	send_done_read_next_frame(55, 43);
+				findLoadNextVideo(msg->type_data.read_next_file.mpegHeader,
+						msg->type_data.read_next_file.mpegTrailer);
+
+				frameOffsets = readFrameData(msg->type_data.read_next_file.bitstream);
+				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
+				DBG_PRINT("DONE_READ_NEXT_FRAME msg sent\n");
+
+				mpegHeader = (MPEG_FILE_HEADER *) msg->type_data.read_next_file.mpegHeader;
+				val = mpegHeader->h_size * mpegHeader->w_size / 64;
+				lossless_decode(val, msg->type_data.read_next_file.bitstream,
+						msg->type_data.read_next_file.yDADC, Yquant, lastFrameType);
+				send_done_ld_y(msg->type_data.read_next_file.yDADC);
+				DBG_PRINT("DONE_LD_Y msg sent\n");
+
+				break;
+
+			case OK_TO_READ_NEXT_FRAME:
+				DBG_PRINT("OK_TO_READ_NEXT_FRAME msg received\n");
+
+				frameOffsets = readFrameData(msg->type_data.ok_to_read_next_frame.bitstream);
+				DBG_PRINT("  OK_TO_READ_NEXT_FRAME msg processed\n");
+
+				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
+				DBG_PRINT("  DONE_READ_NEXT_FRAME msg sent\n");
+
+				break;
+
+			case OK_TO_LD_Y:
+				DBG_PRINT("OK_TO_LD_Y msg received\n");
+
+				val = mpegHeader->h_size * mpegHeader->w_size / 64;
+				lossless_decode(val, msg->type_data.ok_to_ld_y.yBitstream,
+						msg->type_data.ok_to_ld_y.yDADC, Yquant, lastFrameType);
+				DBG_PRINT("OK_TO_LD_Y msg processed\n");
+
+				send_done_ld_y(msg->type_data.ok_to_ld_y.yDADC);
+				DBG_PRINT("DONE_LD_Y msg sent\n");
+
+				break;
+
+			default:
+				assert(0, "INVALID MSG TO SLAVE: %d", msg->header.type);
+		}
+	}
 }
 
 int main()

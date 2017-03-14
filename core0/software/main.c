@@ -53,7 +53,7 @@ static void doWork (void) {
 
 			currentlyPlaying = isVideoPlaying();
 
-			if (keyPressed & PLAY_PAUSE_VIDEO_BUTTON) {\
+			if (keyPressed & PLAY_PAUSE_VIDEO_BUTTON) {
 				DBG_PRINT("Play/Pause button pressed\n");
 				DBG_PRINT("Currently %s, Going to %s\n",
 						currentlyPlaying ? "Playing" : "Paused",

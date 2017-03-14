@@ -34,13 +34,8 @@ typedef struct MPEG_FILE_TRAILER_STRUCT
 
 typedef struct MPEG_WORKING_BUFFER_STRUCT
 {
-	uint8_t* Ybitstream;
-	uint8_t* Cbbitstream;
-	uint8_t* Crbitstream;
-	color_block_t * Yblock;
-	color_block_t * Cbblock;
-	color_block_t * Crblock;
-	dct_block_t * YDCAC;
+	uint8_t volatile * Ybitstream;
+	dct_block_t volatile * YDCAC;
 	dct_block_t * CbDCAC;
 	dct_block_t * CrDCAC;
 } MPEG_WORKING_BUFFER;

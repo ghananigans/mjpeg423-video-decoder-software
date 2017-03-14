@@ -30,8 +30,8 @@
 
 static uint8_t volatile * YBitstream;
 static dct_block_t volatile * YDCAC;
-static dct_block_t volatile * CbDCAC;
-static dct_block_t volatile * CrDCAC;
+static dct_block_t * CbDCAC;
+static dct_block_t * CrDCAC;
 
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
@@ -195,18 +195,13 @@ void rewindVideo (void) {
 void loadVideo (void) {
 	mailbox_msg_t volatile * msg;
 	uint32_t* currentOutputBuffer;
-	uint8_t * ptr;
+	uint8_t volatile * ptr;
 
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
 	playbackData.processedFrame = 0;
 	playbackData.mpegFrameBuffer = (MPEG_WORKING_BUFFER) {
 		YBitstream, // Ybitstream
-		YBitstream, // Cbbitstream
-		YBitstream, // Crbitstream
-		0, // Yblock
-		0, // Cbblock
-		0, // Crblock
 		YDCAC, // YDCAC
 		CbDCAC, // CbDCAC
 		CrDCAC // CrDCAC
@@ -226,17 +221,19 @@ void loadVideo (void) {
 
 	alt_dcache_flush_all();
 
-	ptr = YBitstream + msg->type_data.done_read_next_frame.cbOffset;
-	lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
-			CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+	ptr = playbackData.mpegFrameBuffer.Ybitstream + msg->type_data.done_read_next_frame.cbOffset;
+	lossless_decode(NUM_CB_DCT_BLOCKS, ptr, playbackData.mpegFrameBuffer.CbDCAC,
+			Cquant, msg->type_data.done_read_next_frame.frameType);
 
-	ptr = YBitstream + msg->type_data.done_read_next_frame.crOffset;
-	lossless_decode(NUM_CR_DCT_BLOCKS, ptr,
-			CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+	ptr = playbackData.mpegFrameBuffer.Ybitstream + msg->type_data.done_read_next_frame.crOffset;
+	lossless_decode(NUM_CR_DCT_BLOCKS, ptr, playbackData.mpegFrameBuffer.CrDCAC,
+			Cquant, msg->type_data.done_read_next_frame.frameType);
 
 	alt_dcache_flush_all();
-	idct_accel_calculate_buffer_cb(CbDCAC, NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
-	idct_accel_calculate_buffer_cr(CrDCAC, NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
+	idct_accel_calculate_buffer_cb(playbackData.mpegFrameBuffer.CbDCAC,
+			NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
+	idct_accel_calculate_buffer_cr(playbackData.mpegFrameBuffer.CrDCAC,
+			NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 
 	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
 	msg = recv_msg();
@@ -244,9 +241,11 @@ void loadVideo (void) {
 			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
 	alt_dcache_flush_all();
-	idct_accel_calculate_buffer_y(YDCAC, NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
+	idct_accel_calculate_buffer_y(playbackData.mpegFrameBuffer.YDCAC,
+			NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 
-	ycbcr_to_rgb_accel_get_results(currentOutputBuffer, DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
+	ycbcr_to_rgb_accel_get_results(currentOutputBuffer,
+			DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
 	DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
 	wait_for_ycbcr_to_rgb_finsh();
 	DBG_PRINT("Done ycbcr_to_rgb\n");
@@ -272,7 +271,7 @@ void previewVideo (void) {
 
 void playVideo (int (*functionToStopPlayingFrames)(void)) {
 	mailbox_msg_t volatile * msg;
-	uint8_t * ptr;
+	uint8_t volatile * ptr;
 	uint32_t* currentOutputBuffer;
 
 	DBG_PRINT("Playing the video\n");
@@ -291,8 +290,8 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
 
 	DBG_PRINT("Send msg to slave to read next frame (and do LD Y)\n");
-	send_ok_to_read_next_frame (&YBitstream);
-	send_ok_to_ld_y(&YDCAC);
+	send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
+	send_ok_to_ld_y(playbackData.mpegFrameBuffer.YDCAC);
 
 
 	while (playbackData.processedFrame < playbackData.mpegHeader.num_frames
@@ -310,13 +309,13 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 
 		DBG_PRINT("DONE_READ_NEXT_FRAME msg received\n");
 
-		ptr = &YBitstream + msg->type_data.done_read_next_frame.cbOffset;
-		lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
-				&CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+		ptr = playbackData.mpegFrameBuffer.Ybitstream + msg->type_data.done_read_next_frame.cbOffset;
+		lossless_decode(NUM_CB_DCT_BLOCKS, ptr, playbackData.mpegFrameBuffer.CbDCAC,
+				Cquant, msg->type_data.done_read_next_frame.frameType);
 
-		ptr = &YBitstream + msg->type_data.done_read_next_frame.crOffset;
-		lossless_decode(NUM_CR_DCT_BLOCKS, ptr,
-				&CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+		ptr = playbackData.mpegFrameBuffer.Ybitstream + msg->type_data.done_read_next_frame.crOffset;
+		lossless_decode(NUM_CR_DCT_BLOCKS, ptr, playbackData.mpegFrameBuffer.CrDCAC,
+				Cquant, msg->type_data.done_read_next_frame.frameType);
 
 		if (functionToStopPlayingFrames() == 0) {
 			send_ok_to_read_next_frame (&YBitstream);
@@ -324,8 +323,10 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 		}
 
 		alt_dcache_flush_all();
-		idct_accel_calculate_buffer_cb(&CbDCAC, sizeof(CbDCAC));
-		idct_accel_calculate_buffer_cr(&CrDCAC, sizeof(CrDCAC));
+		idct_accel_calculate_buffer_cb(playbackData.mpegFrameBuffer.CbDCAC,
+				NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
+		idct_accel_calculate_buffer_cr(playbackData.mpegFrameBuffer.CrDCAC,
+				NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 		DBG_PRINT("IDCT CB and CR started\n");
 
 		DBG_PRINT("Waiting for DONE_LD_Y msg\n");
@@ -336,7 +337,8 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 				"Msg request is not DONE_LD_Y: %d", msg->header.type);
 
 		DBG_PRINT("DONE_LD_Y msg received\n");
-		idct_accel_calculate_buffer_y(&YDCAC, sizeof(YDCAC));
+		idct_accel_calculate_buffer_y(playbackData.mpegFrameBuffer.YDCAC,
+				NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 
 		ycbcr_to_rgb_accel_get_results(currentOutputBuffer,
 				DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));

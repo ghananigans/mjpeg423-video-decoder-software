@@ -6,18 +6,18 @@
 static altera_avalon_mailbox_dev *sendMailbox = 0;
 static altera_avalon_mailbox_dev *recvMailbox = 0;
 
-static mailbox_msg_t sendBuffer[4];
+static mailbox_msg_t volatile * sendBuffer;
 static uint8_t counter = 0;
 
 static uint32_t mailboxBuffers[4][2] = {
-	0x1, (uint32_t) &sendBuffer[0],
-	0x1, (uint32_t) &sendBuffer[1],
-	0x1, (uint32_t) &sendBuffer[2],
-	0x1, (uint32_t) &sendBuffer[3]
+	{0x1, 0},
+	{0x1, 0},
+	{0x1, 0},
+	{0x1, 0}
 };
 
 static void send (void) {
-	alt_dcache_flush((void *) &sendBuffer[counter], sizeof(mailbox_msg_t));
+	alt_dcache_flush_all();
 
 	altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL);
 
@@ -25,6 +25,14 @@ static void send (void) {
 }
 
 int init_send_mailbox (char * csr_name) {
+	int i;
+
+	sendBuffer = (mailbox_msg_t volatile *) alt_uncached_malloc(4 * sizeof(mailbox_msg_t));
+
+	for (i = 0; i < 4; ++i) {
+		mailboxBuffers[i][1] = (uint32_t) &sendBuffer[i];
+	}
+
 	sendMailbox = altera_avalon_mailbox_open(csr_name, 0, 0);
 
 	return 1;
@@ -97,3 +105,4 @@ void send_ok_to_ld_y (void * yDADC) {
 
 	send();
 }
+

@@ -16,6 +16,8 @@
 #include "timer.h"
 #include "common/mailbox/mailbox.h"
 #include "idct_ycbcr_to_rgb_accel.h"
+#include <stdbool.h>
+#include <io.h>
 
 #define MAX_IFRAME_OFFSET (24)
 #define NUM_H_BLOCKS (DISPLAY_HEIGHT / 8)
@@ -25,19 +27,11 @@
 #define NUM_Y_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
 #define NUM_CB_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
 #define NUM_CR_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-#define NUM_Y_COLOR_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-#define NUM_CB_COLOR_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-#define NUM_CR_COLOR_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
 
-static uint8_t YBitstream[YBISTREAM_BYTES];
-static color_block_t Yblock[NUM_Y_COLOR_BLOCKS];
-static color_block_t Cbblock[NUM_CB_COLOR_BLOCKS];
-static color_block_t Crblock[NUM_CR_COLOR_BLOCKS];
-static dct_block_t YDCAC[NUM_Y_DCT_BLOCKS];
-static dct_block_t CbDCAC[NUM_CB_DCT_BLOCKS];
-static dct_block_t CrDCAC[NUM_CR_DCT_BLOCKS];
-static MPEG_FILE_HEADER mpegHeader;
-static MPEG_FILE_TRAILER mpegTrailer;
+static uint8_t volatile * YBitstream;
+static dct_block_t volatile * YDCAC;
+static dct_block_t volatile * CbDCAC;
+static dct_block_t volatile * CrDCAC;
 
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
@@ -199,29 +193,30 @@ void rewindVideo (void) {
  */
 
 void loadVideo (void) {
-	mailbox_msg_t * msg;
+	mailbox_msg_t volatile * msg;
 	uint32_t* currentOutputBuffer;
+	uint8_t * ptr;
 
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
 	playbackData.processedFrame = 0;
 	playbackData.mpegFrameBuffer = (MPEG_WORKING_BUFFER) {
-		&YBitstream, // Ybitstream
-		&YBitstream, // Cbbitstream
-		&YBitstream, // Crbitstream
-		&Yblock, // Yblock
-		&Cbblock, // Cbblock
-		&Crblock, // Crblock
-		&YDCAC, // YDCAC
-		&CbDCAC, // CbDCAC
-		&CrDCAC // CrDCAC
+		YBitstream, // Ybitstream
+		YBitstream, // Cbbitstream
+		YBitstream, // Crbitstream
+		0, // Yblock
+		0, // Cbblock
+		0, // Crblock
+		YDCAC, // YDCAC
+		CbDCAC, // CbDCAC
+		CrDCAC // CrDCAC
 	};
 
 	while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
 	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
 
 	DBG_PRINT("Send msg to slave to read next file (and do LD Y)\n");
-	send_read_next_file (&mpegHeader, &mpegTrailer, &YBitstream, &YDCAC);
+	send_read_next_file (&playbackData.mpegHeader, &playbackData.mpegTrailer, YBitstream, YDCAC);
 
 	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
 	msg = recv_msg();
@@ -229,24 +224,27 @@ void loadVideo (void) {
 			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
 
-	uint8_t * ptr = &YBitstream + msg->type_data.done_read_next_frame.cbOffset;
-	lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
-			&CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+	alt_dcache_flush_all();
 
-	ptr += msg->type_data.done_read_next_frame.crOffset;
+	ptr = YBitstream + msg->type_data.done_read_next_frame.cbOffset;
+	lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
+			CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+
+	ptr = YBitstream + msg->type_data.done_read_next_frame.crOffset;
 	lossless_decode(NUM_CR_DCT_BLOCKS, ptr,
-			&CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+			CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
 
 	alt_dcache_flush_all();
-	idct_accel_calculate_buffer_cb(&CbDCAC, sizeof(CbDCAC));
-	idct_accel_calculate_buffer_cr(&CrDCAC, sizeof(CrDCAC));
+	idct_accel_calculate_buffer_cb(CbDCAC, NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
+	idct_accel_calculate_buffer_cr(CrDCAC, NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 
 	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
 	msg = recv_msg();
 	assert(msg->header.type == DONE_LD_Y,
 			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
-	idct_accel_calculate_buffer_y(&YDCAC, sizeof(YDCAC));
+	alt_dcache_flush_all();
+	idct_accel_calculate_buffer_y(YDCAC, NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 
 	ycbcr_to_rgb_accel_get_results(currentOutputBuffer, DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
 	DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
@@ -273,6 +271,10 @@ void previewVideo (void) {
 }
 
 void playVideo (int (*functionToStopPlayingFrames)(void)) {
+	mailbox_msg_t volatile * msg;
+	uint8_t * ptr;
+	uint32_t* currentOutputBuffer;
+
 	DBG_PRINT("Playing the video\n");
 
 	playbackData.playing = playbackData.currentFrame < playbackData.mpegHeader.num_frames;
@@ -285,9 +287,71 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 		startTimer();
 	}
 
+	while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
+	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
+
+	DBG_PRINT("Send msg to slave to read next frame (and do LD Y)\n");
+	send_ok_to_read_next_frame (&YBitstream);
+	send_ok_to_ld_y(&YDCAC);
+
+
 	while (playbackData.processedFrame < playbackData.mpegHeader.num_frames
-			&& functionToStopPlayingFrames() == 0) {
-		playFrame(FORCE_PERIODIC);
+			&& (functionToStopPlayingFrames() == 0)) {
+		//playFrame(FORCE_PERIODIC);
+		while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
+		currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
+
+		DBG_PRINT("Waiting for DONE_READ_NEXT_FRAME msg\n");
+		msg = recv_msg();
+		DBG_PRINT("Got msg type: %d\n", msg->header.type);
+
+		assert(msg->header.type == DONE_READ_NEXT_FRAME,
+				"Msg request is not DONE_READ_NEXT_FRAME: %d", msg->header.type);
+
+		DBG_PRINT("DONE_READ_NEXT_FRAME msg received\n");
+
+		ptr = &YBitstream + msg->type_data.done_read_next_frame.cbOffset;
+		lossless_decode(NUM_CB_DCT_BLOCKS, ptr,
+				&CbDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+
+		ptr = &YBitstream + msg->type_data.done_read_next_frame.crOffset;
+		lossless_decode(NUM_CR_DCT_BLOCKS, ptr,
+				&CrDCAC, Cquant, msg->type_data.done_read_next_frame.frameType);
+
+		if (functionToStopPlayingFrames() == 0) {
+			send_ok_to_read_next_frame (&YBitstream);
+			DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
+		}
+
+		alt_dcache_flush_all();
+		idct_accel_calculate_buffer_cb(&CbDCAC, sizeof(CbDCAC));
+		idct_accel_calculate_buffer_cr(&CrDCAC, sizeof(CrDCAC));
+		DBG_PRINT("IDCT CB and CR started\n");
+
+		DBG_PRINT("Waiting for DONE_LD_Y msg\n");
+		msg = recv_msg();
+		DBG_PRINT("Got msg type: %d\n", msg->header.type);
+
+		assert(msg->header.type == DONE_LD_Y,
+				"Msg request is not DONE_LD_Y: %d", msg->header.type);
+
+		DBG_PRINT("DONE_LD_Y msg received\n");
+		idct_accel_calculate_buffer_y(&YDCAC, sizeof(YDCAC));
+
+		ycbcr_to_rgb_accel_get_results(currentOutputBuffer,
+				DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
+
+		DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
+		wait_for_ycbcr_to_rgb_finsh();
+		DBG_PRINT("Done ycbcr_to_rgb\n");
+
+		ece423_video_display_register_written_buffer(playbackData.display);
+		playbackData.processedFrame++;
+
+		if (functionToStopPlayingFrames() == 0) {
+			send_ok_to_ld_y(&YDCAC);
+			DBG_PRINT("OK_TO_LD_Y msg sent\n");
+		}
 	}
 
 	//
@@ -327,6 +391,31 @@ void closeVideo (void) {
 
 int initPlayback (ece423_video_display* display) {
 	playbackData.display = display;
+
+	YBitstream = alt_uncached_malloc(YBISTREAM_BYTES);
+	if (!YBitstream) {
+		DBG_PRINT("Ybistream malloc failed!\n");
+		return 0;
+	}
+
+	YDCAC = alt_uncached_malloc(NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
+	if (!YDCAC) {
+		DBG_PRINT("YDCAC malloc failed!\n");
+		return 0;
+	}
+
+	CbDCAC = alt_uncached_malloc(NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
+	if (!CbDCAC) {
+		DBG_PRINT("CbDCAC malloc failed!\n");
+		return 0;
+	}
+
+	CrDCAC = alt_uncached_malloc(NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
+	if (!CrDCAC) {
+		DBG_PRINT("CrDCAC malloc failed!\n");
+		return 0;
+	}
+
 	return initTimer(FRAME_RATE_MS, &timerFunction);
 }
 

@@ -21,12 +21,14 @@
 #include "common/lib_ext/mpeg423/mpeg423_decoder_ext.h"
 #include "common/mailbox/mailbox.h"
 #include <system.h>
+#include <sys/alt_cache.h>
 
 FILE_CONTEXT fileContext;
 FAT_FILE_HANDLE hFile;
 FAT_HANDLE hFAT;
 FAT_BROWSE_HANDLE FatBrowseHandle;
 uint8_t lastFrameType;
+int counter = 0;
 
 typedef struct FRAME_OFFSETS_STRUCT {
 	uint32_t cbOffset;
@@ -135,6 +137,7 @@ FRAME_OFFSETS readFrameData (void * buffer) {
 	Ysize       = frame_header[2];
 	Cbsize      = frame_header[3];
 
+	DBG_PRINT("MPG Frame #: %d\n", counter++);
 	DBG_PRINT("    MPG Frame size: %d: \n", frame_size);
 	DBG_PRINT("    MPG Frame type: 0x%x: \n", frame_type);
 
@@ -209,18 +212,22 @@ static void findNextVideo (void) {
 static void findLoadNextVideo (MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer) {
 	findNextVideo();
 	loadVideo(hFAT, Fat_GetFileName(&fileContext), mpegHeader, mpegTrailer);
+	counter =  0;
 }
 
 static void doWork (void) {
-	mailbox_msg_t * msg;
+	mailbox_msg_t volatile * msg;
 	FRAME_OFFSETS frameOffsets;
 	uint32_t val;
 	MPEG_FILE_HEADER* mpegHeader;
+	int prevType = 0;
 
 	while (1) {
 		DBG_PRINT("Waiting for request\n");
 		msg = recv_msg();
 		DBG_PRINT("Got msg type: %d\n", msg->header.type);
+
+		alt_dcache_flush_all();
 
 		switch(msg->header.type) {
 			case READ_NEXT_FILE:
@@ -240,10 +247,13 @@ static void doWork (void) {
 				send_done_ld_y(msg->type_data.read_next_file.yDADC);
 				DBG_PRINT("DONE_LD_Y msg sent\n");
 
+				prevType = OK_TO_LD_Y;
 				break;
 
 			case OK_TO_READ_NEXT_FRAME:
 				DBG_PRINT("OK_TO_READ_NEXT_FRAME msg received\n");
+
+				assert(prevType == OK_TO_LD_Y, "Prev wasn't OK_TO_LD_Y: %d", prevType);
 
 				frameOffsets = readFrameData(msg->type_data.ok_to_read_next_frame.bitstream);
 				DBG_PRINT("  OK_TO_READ_NEXT_FRAME msg processed\n");
@@ -251,10 +261,14 @@ static void doWork (void) {
 				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
 				DBG_PRINT("  DONE_READ_NEXT_FRAME msg sent\n");
 
+				prevType = OK_TO_READ_NEXT_FRAME;
+
 				break;
 
 			case OK_TO_LD_Y:
 				DBG_PRINT("OK_TO_LD_Y msg received\n");
+
+				assert(prevType == OK_TO_READ_NEXT_FRAME, "Prev wasn't OK_TO_LD_Y: %d", prevType);
 
 				val = mpegHeader->h_size * mpegHeader->w_size / 64;
 				lossless_decode(val, msg->type_data.ok_to_ld_y.yBitstream,
@@ -263,6 +277,8 @@ static void doWork (void) {
 
 				send_done_ld_y(msg->type_data.ok_to_ld_y.yDADC);
 				DBG_PRINT("DONE_LD_Y msg sent\n");
+
+				prevType = OK_TO_LD_Y;
 
 				break;
 

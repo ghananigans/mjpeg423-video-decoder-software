@@ -2,9 +2,9 @@
  * linker.x - Linker script
  *
  * Machine generated for CPU 'cpu_1' in SOPC Builder design 'ECE423_QSYS'
- * SOPC Builder design path: C:/Users/ggowripa/Documents/ece423/ECE423_QSYS.sopcinfo
+ * SOPC Builder design path: ../../../ece423/ECE423_QSYS.sopcinfo
  *
- * Generated: Tue Mar 07 13:38:48 EST 2017
+ * Generated: Tue Mar 14 10:47:10 EDT 2017
  */
 
 /*

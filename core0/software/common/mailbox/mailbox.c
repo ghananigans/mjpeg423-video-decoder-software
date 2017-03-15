@@ -19,7 +19,7 @@ static uint32_t mailboxBuffers[4][2] = {
 static void send (void) {
 	alt_dcache_flush_all();
 
-	altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL);
+	while (altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL) != 0);
 
 	counter = (counter + 1) & 0x3;
 }
@@ -46,7 +46,8 @@ int init_recv_mailbox (char * csr_name) {
 
 mailbox_msg_t * recv_msg (void) {
 	uint32_t retData[2];
-	altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0);
+
+	while(altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0) != 0) {}
 
 	return ((mailbox_msg_t * ) retData[1]);
 }

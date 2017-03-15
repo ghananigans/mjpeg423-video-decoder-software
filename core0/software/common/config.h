@@ -28,7 +28,7 @@
 
 #define FRAME_RATE_MS 		(100)
 
-#define FORCE_PERIODIC      (1)
+#define FORCE_PERIODIC      (0)
 
 //
 // Comment this out to disable timing reports

@@ -124,12 +124,12 @@ void loadVideo (FAT_HANDLE hFat, char* filename, MPEG_FILE_HEADER* mpegHeader, M
 }
 
 FRAME_OFFSETS readFrameData (void * buffer) {
-	uint32_t frame_header[4];
-    uint32_t Ysize, Cbsize, frame_size, frame_type;
+	static uint32_t frame_header[4];
+    static uint32_t Ysize, Cbsize, frame_size, frame_type;
     FRAME_OFFSETS retStruct;
 
 	//read frame payload
-    bool read = Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t));
+	bool read = Fat_FileRead(hFile, frame_header, 4*sizeof(uint32_t));
 	assert(read, "cannot read frame header");
 
 	frame_size  = frame_header[0];
@@ -219,7 +219,7 @@ static void doWork (void) {
 	mailbox_msg_t volatile * msg;
 	FRAME_OFFSETS frameOffsets;
 	uint32_t val;
-	MPEG_FILE_HEADER* mpegHeader;
+	MPEG_FILE_HEADER * mpegHeader;
 	int prevType = 0;
 
 	while (1) {

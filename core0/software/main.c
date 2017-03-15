@@ -23,11 +23,16 @@
 #include "idct_ycbcr_to_rgb_accel.h"
 #include "common/mailbox/mailbox.h"
 #include "playback.h"
+#include <stdbool.h>
 
 #define PLAY_PAUSE_VIDEO_BUTTON		(1)
 #define LOAD_NEXT_VIDEO_BUTTON		(2)
 #define FAST_FORWARD_VIDEO_BUTTON	(4)
 #define REWIND_VIDEO_BUTTON			(8)
+
+static test (void) {
+	return 1;
+}
 
 static void doWork (void) {
 	int retVal;
@@ -109,8 +114,8 @@ static void doWork (void) {
 			}
 
 			DBG_PRINT("Playing video\n");
-			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
-
+			//playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
+			playVideo(&test);
 			DBG_PRINT("Video stopped\n");
 		}
 

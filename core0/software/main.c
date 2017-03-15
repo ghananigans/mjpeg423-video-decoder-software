@@ -114,8 +114,8 @@ static void doWork (void) {
 			}
 
 			DBG_PRINT("Playing video\n");
-			//playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
-			playVideo(&test);
+			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
+			//playVideo(&test);
 			DBG_PRINT("Video stopped\n");
 		}
 

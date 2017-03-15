@@ -232,6 +232,10 @@ static void doWork (void) {
 		switch(msg->header.type) {
 			case READ_NEXT_FILE:
 				DBG_PRINT("READ_NEXT_FILE msg received\n");
+				DBG_PRINT(" bistream: %p\n", msg->type_data.read_next_file.bitstream);
+				DBG_PRINT(" yDADC: %p\n", msg->type_data.read_next_file.yDADC);
+				DBG_PRINT(" mpegHeader: %p\n", msg->type_data.read_next_file.mpegHeader);
+				DBG_PRINT(" mpegTrailer: %p\n", msg->type_data.read_next_file.mpegTrailer);
 
 				findLoadNextVideo(msg->type_data.read_next_file.mpegHeader,
 						msg->type_data.read_next_file.mpegTrailer);
@@ -252,6 +256,7 @@ static void doWork (void) {
 
 			case OK_TO_READ_NEXT_FRAME:
 				DBG_PRINT("OK_TO_READ_NEXT_FRAME msg received\n");
+				DBG_PRINT(" bistream: %p\n", msg->type_data.ok_to_read_next_frame.bitstream);
 
 				assert(prevType == OK_TO_LD_Y, "Prev wasn't OK_TO_LD_Y: %d", prevType);
 
@@ -267,9 +272,13 @@ static void doWork (void) {
 
 			case OK_TO_LD_Y:
 				DBG_PRINT("OK_TO_LD_Y msg received\n");
+				DBG_PRINT(" ybistream: %p\n", msg->type_data.ok_to_ld_y.yBitstream);
+				DBG_PRINT(" yDADC: %p\n", msg->type_data.ok_to_ld_y.yDADC);
+				DBG_PRINT(" mpegHeader: %p\n", msg->type_data.ok_to_ld_y.mpegHeader);
 
 				assert(prevType == OK_TO_READ_NEXT_FRAME, "Prev wasn't OK_TO_LD_Y: %d", prevType);
 
+				mpegHeader = (MPEG_FILE_HEADER *) msg->type_data.ok_to_ld_y.mpegHeader;
 				val = mpegHeader->h_size * mpegHeader->w_size / 64;
 				lossless_decode(val, msg->type_data.ok_to_ld_y.yBitstream,
 						msg->type_data.ok_to_ld_y.yDADC, Yquant, lastFrameType);

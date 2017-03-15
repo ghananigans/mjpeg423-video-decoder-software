@@ -303,7 +303,8 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 
 	DBG_PRINT("Send msg to slave to read next frame (and do LD Y)\n");
 	send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
-	send_ok_to_ld_y(playbackData.mpegFrameBuffer.YDCAC);
+	send_ok_to_ld_y(&playbackData.mpegHeader,
+			playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 
 	while (flag) {
 		//playFrame(FORCE_PERIODIC);
@@ -338,7 +339,8 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 			send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
 			DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
 
-			send_ok_to_ld_y(playbackData.mpegFrameBuffer.YDCAC);
+			send_ok_to_ld_y(&playbackData.mpegHeader,
+					playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 			DBG_PRINT("OK_TO_LD_Y msg sent\n");
 
 			while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
@@ -348,6 +350,13 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 		}
 	}
 
+	/*
+	idct_y_ycbcr(0, currentOutputBuffer);
+	if (!FORCE_PERIODIC) {
+		ece423_video_display_switch_frames(playbackData.display);
+		playbackData.currentFrame++;
+	}
+	*/
 	//
 	// Wait until all frames are outputted
 	//

@@ -53,6 +53,6 @@ void send_read_next_file (void * mpegHeader, void * mpegTrailer, void * bitstrea
 void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset, uint8_t frameType);
 void send_ok_to_read_next_frame (void * bitstream);
 void send_done_ld_y (void * yDADC);
-void send_ok_to_ld_y (void * yDADC);
+void send_ok_to_ld_y (void * mpegHeader, void * bitstream, void * yDADC);
 
 #endif // MAILBOX_H_

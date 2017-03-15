@@ -97,12 +97,14 @@ void send_done_ld_y (void * yDADC) {
 	send();
 }
 
-void send_ok_to_ld_y (void * yDADC) {
+void send_ok_to_ld_y (void * mpegHeader, void * bitstream, void * yDADC) {
 	// Set mailbox msg type
 	sendBuffer[counter].header.type = OK_TO_LD_Y;
 
 	// Mailbox msg type specific data
 	sendBuffer[counter].type_data.ok_to_ld_y.yDADC = yDADC;
+	sendBuffer[counter].type_data.ok_to_ld_y.yBitstream = bitstream;
+	sendBuffer[counter].type_data.ok_to_ld_y.mpegHeader = mpegHeader;
 
 	send();
 }

@@ -197,19 +197,21 @@ static inline void ld_idct_cr_cb (mailbox_msg_t volatile * msg) {
 			Cquant, msg->type_data.done_read_next_frame.frameType);
 
 	DBG_PRINT("LD for CB and CR done\n");
-}
 
-static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuffer) {
 	idct_accel_calculate_buffer_cb(playbackData.mpegFrameBuffer.CbDCAC,
 			NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
 
 	idct_accel_calculate_buffer_cr(playbackData.mpegFrameBuffer.CrDCAC,
 			NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 
+	DBG_PRINT("IDCT for CB and CR started\n");
+}
+
+static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuffer) {
 	idct_accel_calculate_buffer_y(playbackData.mpegFrameBuffer.YDCAC,
 			NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 
-	DBG_PRINT("IDCT for Y, CB, CR started\n");
+	DBG_PRINT("IDCT for Y started\n");
 
 	ycbcr_to_rgb_accel_get_results(outputBuffer,
 			DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
@@ -229,7 +231,6 @@ static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuff
 void loadVideo (void) {
 	mailbox_msg_t volatile * msg;
 	uint32_t* currentOutputBuffer;
-	mailbox_msg_t temp;
 
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
@@ -253,7 +254,7 @@ void loadVideo (void) {
 	//
 	alt_dcache_flush_all();
 
-	memcpy(&temp, msg, sizeof(temp));
+	ld_idct_cr_cb(msg);
 
 	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
 	msg = recv_msg();
@@ -261,7 +262,6 @@ void loadVideo (void) {
 			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
 
-	ld_idct_cr_cb(&temp);
 	idct_y_ycbcr(msg, currentOutputBuffer);
 
 	ece423_video_display_switch_frames(playbackData.display);
@@ -282,7 +282,6 @@ void previewVideo (void) {
 
 void playVideo (int (*functionToStopPlayingFrames)(void)) {
 	mailbox_msg_t volatile * msg;
-	mailbox_msg_t temp;
 	uint32_t* currentOutputBuffer;
 	int flag = 1;
 
@@ -316,7 +315,7 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 
 		DBG_PRINT("DONE_READ_NEXT_FRAME msg received\n");
 
-		memcpy(&temp, msg, sizeof(temp));
+		ld_idct_cr_cb(msg);
 
 		DBG_PRINT("Waiting for DONE_LD_Y msg\n");
 		msg = recv_msg();
@@ -326,7 +325,6 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 
 		DBG_PRINT("DONE_LD_Y msg received\n");
 
-		ld_idct_cr_cb(&temp);
 		idct_y_ycbcr(msg, currentOutputBuffer);
 
 		if (!FORCE_PERIODIC) {

@@ -65,6 +65,19 @@ void send_read_next_file (void * mpegHeader, void * mpegTrailer, void * bitstrea
 	send();
 }
 
+void send_seek_video (void * mpegHeader, void * bitstream, void * yDADC, uint32_t framePosition) {
+	// Set mailbox msg type
+	sendBuffer[counter].header.type = SEEK_VIDEO;
+
+	// Mailbox msg type specific data
+	sendBuffer[counter].type_data.seek_video.mpegHeader = mpegHeader;
+	sendBuffer[counter].type_data.seek_video.bitstream = bitstream;
+	sendBuffer[counter].type_data.seek_video.yDADC = yDADC;
+	sendBuffer[counter].type_data.seek_video.framePosition = framePosition;
+
+	send();
+}
+
 void send_done_read_next_frame (uint32_t cbOffset, uint32_t crOffset, uint8_t frameType) {
 	// Set mailbox msg type
 	sendBuffer[counter].header.type = DONE_READ_NEXT_FRAME;

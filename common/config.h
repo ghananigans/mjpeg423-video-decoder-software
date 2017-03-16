@@ -28,7 +28,7 @@
 
 #define FRAME_RATE_MS 		(100)
 
-#define FORCE_PERIODIC      (1)
+#define FORCE_PERIODIC      (0)
 
 //
 // Comment this out to disable timing reports
@@ -39,7 +39,7 @@
 //
 // Comment this out to remove print statements
 //
-#define DEBUG_PRINT_ENABLED
+//#define DEBUG_PRINT_ENABLED
 
 //
 // Uncomment to not use the HW accelerator for idct calculations

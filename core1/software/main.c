@@ -35,7 +35,18 @@ typedef struct FRAME_OFFSETS_STRUCT {
 	uint32_t crOffset;
 }FRAME_OFFSETS;
 
+static void seekFrame (uint32_t framePosition) {
+	bool error;
 
+	DBG_PRINT("Move to seel position: %d\n", framePosition);
+
+	//
+	// Move file to frame
+	//
+	error = Fat_FileSeek(hFile, FILE_SEEK_BEGIN,
+			framePosition);
+	assert(error, "Failed to seek file\n");
+}
 int load_mpeg_header (FAT_FILE_HANDLE hFile, MPEG_FILE_HEADER* mpegHeader) {
 	//
 	// Seek to the beginning of the file
@@ -252,6 +263,30 @@ static void doWork (void) {
 				DBG_PRINT("DONE_LD_Y msg sent\n");
 
 				prevType = OK_TO_LD_Y;
+				break;
+
+			case SEEK_VIDEO:
+				DBG_PRINT("SEEK_VIDEO msg received\n");
+				DBG_PRINT(" bistream: %p\n", msg->type_data.seek_video.bitstream);
+				DBG_PRINT(" yDADC: %p\n", msg->type_data.seek_video.yDADC);
+				DBG_PRINT(" framePosition: %p\n", msg->type_data.seek_video.framePosition);
+
+				seekFrame(msg->type_data.seek_video.framePosition);
+				DBG_PRINT("Rewinding complete\n");
+
+				frameOffsets = readFrameData(msg->type_data.seek_video.bitstream);
+				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
+				DBG_PRINT("DONE_READ_NEXT_FRAME msg sent\n");
+
+				mpegHeader = (MPEG_FILE_HEADER *) msg->type_data.seek_video.mpegHeader;
+				val = mpegHeader->h_size * mpegHeader->w_size / 64;
+				lossless_decode(val, msg->type_data.seek_video.bitstream,
+						msg->type_data.seek_video.yDADC, Yquant, lastFrameType);
+				send_done_ld_y(msg->type_data.seek_video.yDADC);
+				DBG_PRINT("DONE_LD_Y msg sent\n");
+
+				prevType = OK_TO_LD_Y;
+
 				break;
 
 			case OK_TO_READ_NEXT_FRAME:

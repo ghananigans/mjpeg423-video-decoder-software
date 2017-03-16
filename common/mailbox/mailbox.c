@@ -19,7 +19,7 @@ static uint32_t mailboxBuffers[4][2] = {
 static void send (void) {
 	alt_dcache_flush_all();
 
-	altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL);
+	while (altera_avalon_mailbox_send(sendMailbox, (void *) mailboxBuffers[counter], 0, POLL) != 0);
 
 	counter = (counter + 1) & 0x3;
 }
@@ -46,7 +46,8 @@ int init_recv_mailbox (char * csr_name) {
 
 mailbox_msg_t * recv_msg (void) {
 	uint32_t retData[2];
-	altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0);
+
+	while(altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0) != 0) {}
 
 	return ((mailbox_msg_t * ) retData[1]);
 }
@@ -60,6 +61,19 @@ void send_read_next_file (void * mpegHeader, void * mpegTrailer, void * bitstrea
 	sendBuffer[counter].type_data.read_next_file.mpegTrailer = mpegTrailer;
 	sendBuffer[counter].type_data.read_next_file.bitstream = bitstream;
 	sendBuffer[counter].type_data.read_next_file.yDADC = yDADC;
+
+	send();
+}
+
+void send_seek_video (void * mpegHeader, void * bitstream, void * yDADC, uint32_t framePosition) {
+	// Set mailbox msg type
+	sendBuffer[counter].header.type = SEEK_VIDEO;
+
+	// Mailbox msg type specific data
+	sendBuffer[counter].type_data.seek_video.mpegHeader = mpegHeader;
+	sendBuffer[counter].type_data.seek_video.bitstream = bitstream;
+	sendBuffer[counter].type_data.seek_video.yDADC = yDADC;
+	sendBuffer[counter].type_data.seek_video.framePosition = framePosition;
 
 	send();
 }
@@ -96,13 +110,14 @@ void send_done_ld_y (void * yDADC) {
 	send();
 }
 
-void send_ok_to_ld_y (void * yDADC) {
+void send_ok_to_ld_y (void * mpegHeader, void * bitstream, void * yDADC) {
 	// Set mailbox msg type
 	sendBuffer[counter].header.type = OK_TO_LD_Y;
 
 	// Mailbox msg type specific data
 	sendBuffer[counter].type_data.ok_to_ld_y.yDADC = yDADC;
+	sendBuffer[counter].type_data.ok_to_ld_y.yBitstream = bitstream;
+	sendBuffer[counter].type_data.ok_to_ld_y.mpegHeader = mpegHeader;
 
 	send();
 }
-

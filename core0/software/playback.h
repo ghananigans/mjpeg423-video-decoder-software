@@ -8,15 +8,16 @@
 #ifndef PLAYBACK_H_
 #define PLAYBACK_H_
 
-//#include "libs/ece423_sd/ece423_sd.h"
 #include "libs/ece423_vid_ctl/ece423_vid_ctl.h"
 #include <stdbool.h>
+
+int fastForwardVideo (void);
+
+void rewindVideo (void);
 
 void loadVideo (void);
 
 void playVideo (int (*functionToStopPlayingFrames)(void));
-
-void previewVideo (void);
 
 bool isVideoPlaying (void);
 

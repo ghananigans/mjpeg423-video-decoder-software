@@ -47,7 +47,7 @@ int init_recv_mailbox (char * csr_name) {
 mailbox_msg_t * recv_msg (void) {
 	uint32_t retData[2];
 
-	while(altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0) != 0) {}
+	while(altera_avalon_mailbox_retrieve_poll(recvMailbox, &retData, 0) != 0);
 
 	return ((mailbox_msg_t * ) retData[1]);
 }

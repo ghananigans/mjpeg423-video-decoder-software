@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <io.h>
 #include <string.h>
+#include <sys/alt_cache.h>
 
 #define MAX_IFRAME_OFFSET (24)
 
@@ -53,40 +54,6 @@ static void timerFunction (void) {
 	int retVal;
 	retVal = ece423_video_display_switch_frames(playbackData.display);
 	if (retVal != -1) {
-		playbackData.currentFrame++;
-	}
-}
-
-/*
- *   Private playback api
- */
-static inline void playFrame (bool forcePeriodic) {
-	int retVal;
-	uint32_t* currentOutputBuffer;
-
-	// Wait until a buffer is available again
-	while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
-
-	// Get a pointer to the available buffer
-	currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
-
-	// Read and decode frame and write it to the buffer
-	DBG_PRINT("Frame #%u:\n", playbackData.processedFrame);
-	// Send request to slave to read SD
-	// Wait for response saying done reading SD
-	// Send request to Slave to do LD Y
-	// Do LD CB and Cr
-	// Tell slave done LD cb and Cr (read SD)
-	// DO IDCT for all 3
-	// let slave know that idct y is done
-
-	// Flag the buffer as written
-	ece423_video_display_register_written_buffer(playbackData.display);
-
-	playbackData.processedFrame++;
-
-	if (!forcePeriodic) {
-		ece423_video_display_switch_frames(playbackData.display);
 		playbackData.currentFrame++;
 	}
 }
@@ -137,6 +104,49 @@ static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuff
 	DBG_PRINT("Registered output frame buffer\n");
 }
 
+static void process (void * const currentOutputBuffer, bool const firstFrame, bool const sendRequest, bool const noTimer) {
+	mailbox_msg_t volatile * msg;
+
+	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
+	msg = recv_msg();
+	assert(msg->header.type == DONE_READ_NEXT_FRAME,
+			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
+	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
+
+	if (firstFrame) {
+		//
+		// Flush cache so that our mpeg header and trailer stuff is updated
+		//
+		alt_dcache_flush_all();
+	}
+
+	if (sendRequest) {
+		send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
+		DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
+	}
+
+	ld_idct_cr_cb(msg);
+
+	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
+	msg = recv_msg();
+	assert(msg->header.type == DONE_LD_Y,
+			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
+	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
+
+	idct_y_ycbcr(msg, currentOutputBuffer);
+
+	if (noTimer) {
+		ece423_video_display_switch_frames(playbackData.display);
+		playbackData.currentFrame++;
+	}
+
+	if (sendRequest) {
+		send_ok_to_ld_y(&playbackData.mpegHeader,
+				playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
+		DBG_PRINT("OK_TO_LD_Y msg sent\n");
+	}
+}
+
 static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
 	bool error;
 	void * currentOutputBuffer;
@@ -155,28 +165,10 @@ static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
 	send_seek_video (&playbackData.mpegHeader, playbackData.mpegFrameBuffer.Ybitstream,
 			playbackData.mpegFrameBuffer.YDCAC, framePosition);
 
-	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
-	msg = recv_msg();
-	assert(msg->header.type == DONE_READ_NEXT_FRAME,
-			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
-	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
-
-	ld_idct_cr_cb(msg);
-
-	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
-	msg = recv_msg();
-	assert(msg->header.type == DONE_LD_Y,
-			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
-	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
-
-	idct_y_ycbcr(msg, currentOutputBuffer);
-
-	ece423_video_display_switch_frames(playbackData.display);
-	playbackData.currentFrame++;
+	process(currentOutputBuffer, 0, 0, 1);
 
 	DBG_PRINT("Done load video\n");
 }
-
 
 int fastForwardVideo (void) {
 	int index;
@@ -265,41 +257,9 @@ void loadVideo (void) {
 	send_read_next_file (&playbackData.mpegHeader, &playbackData.mpegTrailer,
 			playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 
-	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
-	msg = recv_msg();
-	assert(msg->header.type == DONE_READ_NEXT_FRAME,
-			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
-	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
-
-	//
-	// Flush cache so that our mpeg header and trailer stuff is updated
-	//
-	alt_dcache_flush_all();
-
-	ld_idct_cr_cb(msg);
-
-	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
-	msg = recv_msg();
-	assert(msg->header.type == DONE_LD_Y,
-			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
-	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
-
-	idct_y_ycbcr(msg, currentOutputBuffer);
-
-	ece423_video_display_switch_frames(playbackData.display);
-	playbackData.currentFrame++;
+	process(currentOutputBuffer, 1, 0, 1);
 
 	DBG_PRINT("Done load video\n");
-}
-
-void previewVideo (void) {
-	//startPlaybackFrameTimer();
-
-	if (playbackData.currentFrame < playbackData.mpegHeader.num_frames) {
-		playFrame(0);
-	}
-
-	//stopPlaybackFrameTimer();
 }
 
 void playVideo (int (*functionToStopPlayingFrames)(void)) {
@@ -328,7 +288,6 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 			playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 
 	while (flag) {
-		//playFrame(FORCE_PERIODIC);
 		DBG_PRINT("Waiting for DONE_READ_NEXT_FRAME msg\n");
 		msg = recv_msg();
 		DBG_PRINT("Got msg type: %d\n", msg->header.type);
@@ -338,6 +297,14 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 		DBG_PRINT("DONE_READ_NEXT_FRAME msg received\n");
 
 		ld_idct_cr_cb(msg);
+
+		if ((playbackData.processedFrame < (playbackData.mpegHeader.num_frames - 1))
+				&& (functionToStopPlayingFrames() == 0)) {
+			send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
+			DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
+		} else {
+			flag = 0;
+		}
 
 		DBG_PRINT("Waiting for DONE_LD_Y msg\n");
 		msg = recv_msg();
@@ -354,19 +321,13 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 			playbackData.currentFrame++;
 		}
 
-		if ((playbackData.processedFrame < playbackData.mpegHeader.num_frames)
-				&& (functionToStopPlayingFrames() == 0)) {
-			send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
-			DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
-
+		if (flag) {
 			send_ok_to_ld_y(&playbackData.mpegHeader,
 					playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 			DBG_PRINT("OK_TO_LD_Y msg sent\n");
 
 			while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
 			currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
-		} else {
-			flag = 0;
 		}
 	}
 
@@ -445,4 +406,3 @@ int initPlayback (ece423_video_display* display) {
 
 	return initTimer(FRAME_RATE_MS, &timerFunction);
 }
-

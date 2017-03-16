@@ -26,9 +26,9 @@
 // The number of buffers to initialize the display with
 #define NUM_OUTPUT_BUFFERS	(5)
 
-#define FRAME_RATE_MS 		(100)
+#define FRAME_RATE_MS 		(40)
 
-#define FORCE_PERIODIC      (0)
+#define FORCE_PERIODIC      (1)
 
 //
 // Comment this out to disable timing reports

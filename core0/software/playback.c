@@ -41,8 +41,6 @@ typedef struct PLAYBACK_DATA_STRUCT{
 	ece423_video_display* display;
 }PLAYBACK_DATA;
 
-volatile bool interuptFlag = false;
-volatile bool switchFrame  = false;
 static PLAYBACK_DATA playbackData;
 
 
@@ -50,7 +48,6 @@ static PLAYBACK_DATA playbackData;
  *   Timer control for controlling the frame rate
  */
 static void timerFunction (void) {
-	//switchFrame = true;
 	int retVal;
 	retVal = ece423_video_display_switch_frames(playbackData.display);
 	if (retVal != -1) {
@@ -104,7 +101,7 @@ static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuff
 	DBG_PRINT("Registered output frame buffer\n");
 }
 
-static void process (void * const currentOutputBuffer, bool const firstFrame, bool const sendRequest, bool const noTimer) {
+static inline void process (void * const currentOutputBuffer, bool const firstFrame, bool const sendRequest, bool const noTimer) {
 	mailbox_msg_t volatile * msg;
 
 	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
@@ -120,12 +117,12 @@ static void process (void * const currentOutputBuffer, bool const firstFrame, bo
 		alt_dcache_flush_all();
 	}
 
+	ld_idct_cr_cb(msg);
+
 	if (sendRequest) {
 		send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
 		DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
 	}
-
-	ld_idct_cr_cb(msg);
 
 	DBG_PRINT("Wait for response from slave so we can start IDCT Y\n");
 	msg = recv_msg();
@@ -148,9 +145,7 @@ static void process (void * const currentOutputBuffer, bool const firstFrame, bo
 }
 
 static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
-	bool error;
 	void * currentOutputBuffer;
-	mailbox_msg_t volatile * msg;
 
 	DBG_PRINT("Move to frame #%u from current frame #%u at frame position of %d\n",
 			frameIndex, playbackData.currentFrame, framePosition);
@@ -243,7 +238,6 @@ void rewindVideo (void) {
 }
 
 void loadVideo (void) {
-	mailbox_msg_t volatile * msg;
 	uint32_t* currentOutputBuffer;
 
 	playbackData.playing = false;
@@ -263,7 +257,6 @@ void loadVideo (void) {
 }
 
 void playVideo (int (*functionToStopPlayingFrames)(void)) {
-	mailbox_msg_t volatile * msg;
 	uint32_t* currentOutputBuffer;
 	int flag = 1;
 
@@ -288,56 +281,17 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 			playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 
 	while (flag) {
-		DBG_PRINT("Waiting for DONE_READ_NEXT_FRAME msg\n");
-		msg = recv_msg();
-		DBG_PRINT("Got msg type: %d\n", msg->header.type);
-		assert(msg->header.type == DONE_READ_NEXT_FRAME,
-				"Msg request is not DONE_READ_NEXT_FRAME: %d", msg->header.type);
+		flag = ((playbackData.processedFrame < (playbackData.mpegHeader.num_frames - 1))
+				&& (functionToStopPlayingFrames() == 0));
 
-		DBG_PRINT("DONE_READ_NEXT_FRAME msg received\n");
-
-		ld_idct_cr_cb(msg);
-
-		if ((playbackData.processedFrame < (playbackData.mpegHeader.num_frames - 1))
-				&& (functionToStopPlayingFrames() == 0)) {
-			send_ok_to_read_next_frame(playbackData.mpegFrameBuffer.Ybitstream);
-			DBG_PRINT("OK_TO_READ_NEXT_FRAME msg sent\n");
-		} else {
-			flag = 0;
-		}
-
-		DBG_PRINT("Waiting for DONE_LD_Y msg\n");
-		msg = recv_msg();
-		DBG_PRINT("Got msg type: %d\n", msg->header.type);
-		assert(msg->header.type == DONE_LD_Y,
-				"Msg request is not DONE_LD_Y: %d", msg->header.type);
-
-		DBG_PRINT("DONE_LD_Y msg received\n");
-
-		idct_y_ycbcr(msg, currentOutputBuffer);
-
-		if (!FORCE_PERIODIC) {
-			ece423_video_display_switch_frames(playbackData.display);
-			playbackData.currentFrame++;
-		}
+		process(currentOutputBuffer, 0, flag, !FORCE_PERIODIC);
 
 		if (flag) {
-			send_ok_to_ld_y(&playbackData.mpegHeader,
-					playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
-			DBG_PRINT("OK_TO_LD_Y msg sent\n");
-
 			while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
 			currentOutputBuffer = ece423_video_display_get_buffer(playbackData.display);
 		}
 	}
 
-	/*
-	idct_y_ycbcr(0, currentOutputBuffer);
-	if (!FORCE_PERIODIC) {
-		ece423_video_display_switch_frames(playbackData.display);
-		playbackData.currentFrame++;
-	}
-	*/
 	//
 	// Wait until all frames are outputted
 	//
@@ -390,14 +344,14 @@ int initPlayback (ece423_video_display* display) {
 		return 0;
 	}
 
-	playbackData.mpegFrameBuffer.CbDCAC = (dct_block_t volatile *)alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.CbDCAC = (dct_block_t volatile *) alt_uncached_malloc(
 			NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
 	if (!playbackData.mpegFrameBuffer.CbDCAC) {
 		DBG_PRINT("CbDCAC malloc failed!\n");
 		return 0;
 	}
 
-	playbackData.mpegFrameBuffer.CrDCAC = (dct_block_t volatile *)alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.CrDCAC = (dct_block_t volatile *) alt_uncached_malloc(
 			NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 	if (!playbackData.mpegFrameBuffer.CrDCAC) {
 		DBG_PRINT("CrDCAC malloc failed!\n");

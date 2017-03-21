@@ -118,8 +118,6 @@ void unload_mpeg_trailer (MPEG_FILE_TRAILER* mpegTrailer) {
 }
 
 void loadVideo (FAT_HANDLE hFat, char* filename, MPEG_FILE_HEADER* mpegHeader, MPEG_FILE_TRAILER* mpegTrailer) {
-	int retVal;
-
 	DBG_PRINT("Loading next video...\n");
 
 	// opening the file

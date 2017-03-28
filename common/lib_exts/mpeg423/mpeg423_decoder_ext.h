@@ -36,8 +36,8 @@ typedef struct MPEG_WORKING_BUFFER_STRUCT
 {
 	uint8_t volatile * Ybitstream;
 	dct_block_t volatile * YDCAC;
-	dct_block_t * CbDCAC;
-	dct_block_t * CrDCAC;
+	dct_block_t volatile * CbDCAC;
+	dct_block_t volatile * CrDCAC;
 } MPEG_WORKING_BUFFER;
 
 #endif /* MPEG423_DECODER_EXT_H_ */

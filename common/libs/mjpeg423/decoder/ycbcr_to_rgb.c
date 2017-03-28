@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include "mjpeg423_decoder.h"
 #include "../common/util.h"
-#include "../../../../../common/config.h"
-#include "../../../../../common/utils.h"
+#include "../../../config.h"
+#include "../../../utils.h"
 
 #ifndef NULL_COLORCONV
 

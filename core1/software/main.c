@@ -18,7 +18,7 @@
 #include "common/config.h"
 #include "common/utils.h"
 #include "libs/ece423_sd/ece423_sd.h"
-#include "common/lib_ext/mpeg423/mpeg423_decoder_ext.h"
+#include "common/lib_exts/mpeg423/mpeg423_decoder_ext.h"
 #include "common/mailbox/mailbox.h"
 #include <system.h>
 #include <sys/alt_cache.h>

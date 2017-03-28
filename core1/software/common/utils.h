@@ -51,7 +51,13 @@
 // Basic true false definitions, be careful of checking for something == true,
 // value of something may be not 0 but also not one
 //
+
+#ifndef false
 #define false (0)
+#endif // #ifndef false
+
+#ifndef true
 #define true  (1)
+#endif // #ifndef true
 
 #endif /* UTILS_H_ */

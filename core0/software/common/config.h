@@ -24,11 +24,11 @@
 #define DISPLAY_HEIGHT		(480)
 
 // The number of buffers to initialize the display with
-#define NUM_OUTPUT_BUFFERS	(8) // MUST BE A POWER OF 2
+#define NUM_OUTPUT_BUFFERS	(4) // MUST BE A POWER OF 2
 
 #define FRAME_RATE_US 		(41666) // 24 fps
 
-#define FORCE_PERIODIC      (0)
+#define FORCE_PERIODIC      (1)
 
 //
 // Comment this out to disable timing reports

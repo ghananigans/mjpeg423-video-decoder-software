@@ -43,9 +43,6 @@ static void timerFunction (void) {
 	if (retVal != -1) {
 		playbackData.currentFrame++;
 	}
-	else {
-		assert_persistent(false, "failed\n");
-	}
 }
 
 /*

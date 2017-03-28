@@ -53,6 +53,9 @@ static void timerFunction (void) {
 	if (retVal != -1) {
 		playbackData.currentFrame++;
 	}
+	else {
+		assert(false, "failed\n");
+	}
 }
 
 /*
@@ -358,5 +361,5 @@ int initPlayback (ece423_video_display* display) {
 		return 0;
 	}
 
-	return initTimer(FRAME_RATE_MS, &timerFunction);
+	return initTimer(FRAME_RATE_US, &timerFunction);
 }

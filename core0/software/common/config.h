@@ -26,7 +26,7 @@
 // The number of buffers to initialize the display with
 #define NUM_OUTPUT_BUFFERS	(6)
 
-#define FRAME_RATE_MS 		(40)
+#define FRAME_RATE_US 		(41667)
 
 #define FORCE_PERIODIC      (1)
 

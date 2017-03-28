@@ -9,7 +9,7 @@
 #define TIMER_H_
 
 
-int initTimer (unsigned int milliseconds, void (*timerTickFunc)(void));
+int initTimer (unsigned int microseconds, void (*timerTickFunc)(void));
 void startTimer (void);
 void stopTimer (void);
 

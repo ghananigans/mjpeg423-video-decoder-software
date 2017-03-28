@@ -19,11 +19,11 @@ static void timerIrq (void* isr_context) {
 	timerTickIsrFunc();
 }
 
-int initTimer (unsigned int milliseconds, void (*timerTickFunc)(void)) {
+int initTimer (unsigned int microseconds, void (*timerTickFunc)(void)) {
 	alt_u64 timerPeriod;
 	int retVal;
 
-	timerPeriod = (alt_u64)milliseconds * (alt_u64)TIMER_0_1_FREQ / 1000;
+	timerPeriod = (alt_u64)microseconds * (alt_u64)TIMER_0_1_FREQ / 1000000;
 
 	// Initialize timer interrupt vector
 	timerTickIsrFunc = timerTickFunc;

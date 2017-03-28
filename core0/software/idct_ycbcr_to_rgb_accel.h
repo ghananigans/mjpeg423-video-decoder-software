@@ -8,7 +8,7 @@
 #ifndef YCBR_TO_RGB_ACCEL_H_
 #define YCBR_TO_RGB_ACCEL_H_
 
-#include "../../common/libs/mjpeg423/common/mjpeg423_types.h"
+#include "common/libs/mjpeg423/common/mjpeg423_types.h"
 
 int init_idct_ycbcr_to_rgb_accel (void);
 void idct_accel_calculate_buffer_y (void * inputBuffer, uint32_t sizeOfInputBuffer);

@@ -8,10 +8,10 @@
 #ifndef PROFILE_H_
 #define PROFILE_H_
 
-#include "../../common/config.h"
+#include "common/config.h"
 #include <sys/alt_timestamp.h>
 #include <stdint.h>
-#include "../../common/utils.h"
+#include "common/utils.h"
 
 #define NUM_TIMING_TESTS							(10)
 #define NUM_SIZE_TESTS								(4)

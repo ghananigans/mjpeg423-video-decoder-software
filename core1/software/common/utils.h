@@ -37,7 +37,12 @@
 //
 // Asserts on !x and prints errorstr
 //
-#define assert(x, errorStr, ...)						\
+#define assert(x, errorStr, ...)
+
+//
+// Asserts on !x and prints errorstr
+//
+#define assert_persistent(x, errorStr, ...)				\
 	{													\
 		if (!(x)) {										\
 			printf("[%s:%d]** Asserting with error: "	\

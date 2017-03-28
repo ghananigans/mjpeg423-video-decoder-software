@@ -71,6 +71,7 @@ ece423_video_display* ece423_video_display_init(char* sgdma_name, int width,
 	display->width = width;
 	display->height = height;
 	display->num_frame_buffers = num_buffers;
+	display->num_frame_buffers_mask = num_buffers - 1;
 	display->bytes_per_frame = bytes_per_frame;
 	display->bytes_per_pixel = bytes_per_pixel;
 	display->buffer_being_displayed = 0;
@@ -132,8 +133,9 @@ void ece423_video_display_register_written_buffer(ece423_video_display* display)
 	 * ece423_video_display_buffer_is_available
 	 * to Check Before Drawing in it
 	 */
+
 	display->buffer_being_written = (display->buffer_being_written + 1)
-			% display->num_frame_buffers;
+			& display->num_frame_buffers_mask;
 }
 
 /******************************************************************
@@ -175,7 +177,7 @@ int ece423_video_display_switch_frames(ece423_video_display* display) {
 	alt_u32 RD_Desc_Fifo_Level;
 
 	iNext_Rd_Buf = ((display->buffer_being_displayed + 1)
-			% display->num_frame_buffers);
+			& display->num_frame_buffers_mask);
 
 	// If there is only one buffer, display it!
 	if (display->num_frame_buffers == 1) {

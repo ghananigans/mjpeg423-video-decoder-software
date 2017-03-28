@@ -88,3 +88,11 @@ void wait_for_ycbcr_to_rgb_finsh (void) {
 		csr_status = IORD_ALTERA_MSGDMA_CSR_STATUS(from_ycbcr_to_rgb_accel.dev->csr_base);
 	}
 }
+
+void wait_for_idct_y_finsh (void) {
+	alt_u32 csr_status = 1;
+
+	while(csr_status & ALTERA_MSGDMA_CSR_BUSY_MASK){
+		csr_status = IORD_ALTERA_MSGDMA_CSR_STATUS(to_idct_accel_y.dev->csr_base);
+	}
+}

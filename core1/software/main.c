@@ -151,7 +151,7 @@ FRAME_OFFSETS readFrameData (void * buffer) {
 	DBG_PRINT("    MPG Frame type: 0x%x: \n", frame_type);
 
 	read = Fat_FileRead(hFile, buffer, frame_size - 4 * sizeof(uint32_t));
-	assert(read, "cannot read frame data");
+	assert_persistent(read, "cannot read frame data");
 
 	// Keep track of last frame type
 	lastFrameType = frame_type;
@@ -250,6 +250,7 @@ static void doWork (void) {
 						msg->type_data.read_next_file.mpegTrailer);
 
 				frameOffsets = readFrameData(msg->type_data.read_next_file.bitstream);
+				alt_dcache_flush(msg->type_data.read_next_file.bitstream, YBISTREAM_BYTES);
 				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
 				DBG_PRINT("DONE_READ_NEXT_FRAME msg sent\n");
 
@@ -257,6 +258,7 @@ static void doWork (void) {
 				val = mpegHeader->h_size * mpegHeader->w_size / 64;
 				lossless_decode(val, msg->type_data.read_next_file.bitstream,
 						msg->type_data.read_next_file.yDADC, Yquant, lastFrameType);
+				alt_dcache_flush(msg->type_data.read_next_file.yDADC, NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 				send_done_ld_y(msg->type_data.read_next_file.yDADC);
 				DBG_PRINT("DONE_LD_Y msg sent\n");
 
@@ -273,6 +275,7 @@ static void doWork (void) {
 				DBG_PRINT("Rewinding complete\n");
 
 				frameOffsets = readFrameData(msg->type_data.seek_video.bitstream);
+				alt_dcache_flush(msg->type_data.seek_video.bitstream, YBISTREAM_BYTES);
 				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
 				DBG_PRINT("DONE_READ_NEXT_FRAME msg sent\n");
 
@@ -280,6 +283,7 @@ static void doWork (void) {
 				val = mpegHeader->h_size * mpegHeader->w_size / 64;
 				lossless_decode(val, msg->type_data.seek_video.bitstream,
 						msg->type_data.seek_video.yDADC, Yquant, lastFrameType);
+				alt_dcache_flush(msg->type_data.seek_video.yDADC, NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 				send_done_ld_y(msg->type_data.seek_video.yDADC);
 				DBG_PRINT("DONE_LD_Y msg sent\n");
 
@@ -294,6 +298,7 @@ static void doWork (void) {
 				assert(prevType == OK_TO_LD_Y, "Prev wasn't OK_TO_LD_Y: %d", prevType);
 
 				frameOffsets = readFrameData(msg->type_data.ok_to_read_next_frame.bitstream);
+				alt_dcache_flush(msg->type_data.ok_to_read_next_frame.bitstream, YBISTREAM_BYTES);
 				DBG_PRINT("  OK_TO_READ_NEXT_FRAME msg processed\n");
 
 				send_done_read_next_frame(frameOffsets.cbOffset, frameOffsets.crOffset, lastFrameType);
@@ -315,6 +320,7 @@ static void doWork (void) {
 				val = mpegHeader->h_size * mpegHeader->w_size / 64;
 				lossless_decode(val, msg->type_data.ok_to_ld_y.yBitstream,
 						msg->type_data.ok_to_ld_y.yDADC, Yquant, lastFrameType);
+				alt_dcache_flush(msg->type_data.ok_to_ld_y.yDADC, NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 				DBG_PRINT("OK_TO_LD_Y msg processed\n");
 
 				send_done_ld_y(msg->type_data.ok_to_ld_y.yDADC);

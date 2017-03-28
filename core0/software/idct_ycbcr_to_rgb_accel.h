@@ -19,5 +19,6 @@ void ycbcr_to_rgb_accel_get_results (void * outputBuffer, uint32_t sizeOfOutputB
 void ycbcr_to_rgb_accel_calculate_buffer(color_block_t* yBlock, color_block_t* crBlock, color_block_t* cbBlock,
 		rgb_pixel_t* outputBuffer, int hCb_size, int wCb_size, int w_size);
 void wait_for_ycbcr_to_rgb_finsh (void);
+void wait_for_idct_y_finsh (void);
 
 #endif /* YCBR_TO_RGB_ACCEL_H_ */

@@ -24,9 +24,9 @@
 #define DISPLAY_HEIGHT		(480)
 
 // The number of buffers to initialize the display with
-#define NUM_OUTPUT_BUFFERS	(6)
+#define NUM_OUTPUT_BUFFERS	(16) // MUST BE A POWER OF 2
 
-#define FRAME_RATE_MS 		(41667)
+#define FRAME_RATE_US 		(41666) // 24 fps
 
 #define FORCE_PERIODIC      (1)
 
@@ -50,5 +50,15 @@
 // Uncomment to not use the HW accelerator for YCBCR_TO_RGB calculations
 //
 #define YCBCR_TO_RGB_HW_ACCEL
+
+#define MAX_IFRAME_OFFSET (24)
+
+#define NUM_H_BLOCKS (DISPLAY_HEIGHT / 8)
+#define NUM_W_BLOCKS (DISPLAY_WIDTH / 8)
+#define YBISTREAM_BYTES (NUM_H_BLOCKS * NUM_W_BLOCKS * 64 * sizeof(DCTELEM) + \
+    		2 * NUM_H_BLOCKS * NUM_W_BLOCKS * 64 * sizeof(DCTELEM))
+#define NUM_Y_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
+#define NUM_CB_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
+#define NUM_CR_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
 
 #endif /* CONFIG_H_ */

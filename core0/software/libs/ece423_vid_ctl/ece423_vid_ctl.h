@@ -66,6 +66,7 @@ typedef struct {
   int bytes_per_frame;
   int num_frame_buffers;
   int descriptors_per_frame;
+  int num_frame_buffers_mask;
 } ece423_video_display;
 
 // -------------

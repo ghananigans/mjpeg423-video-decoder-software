@@ -70,6 +70,7 @@ void lossless_decode(int num_blocks, void* bitstream, dct_block_t* DCACq, dct_bl
     update_buffer(&bitbuffer, &bitstream, &bitcount, 32);
 
     huff_input_t ib;
+
     //Used for I frame DC differential encoding
     DCTELEM cur = 0;
 
@@ -135,7 +136,7 @@ void lossless_decode(int num_blocks, void* bitstream, dct_block_t* DCACq, dct_bl
 
 
 //update buffer
-void update_buffer(uint32_t* pbitbuffer, void** pbitstream, int* pbitcount,
+void inline update_buffer(uint32_t* pbitbuffer, void** pbitstream, int* pbitcount,
         uint8_t size) {
     //remove decoded bits
     (*pbitbuffer) <<= size;
@@ -159,6 +160,43 @@ void update_buffer(uint32_t* pbitbuffer, void** pbitstream, int* pbitcount,
     }
     *pbitcount &= 7; //the resulting *pbitcount should be between 0 and 7
 }
+
+void inline update_buffer_fast(uint32_t* pbitbuffer, void** pbitstream, int* pbitcount,
+        uint8_t size) {
+    //remove decoded bits
+    (*pbitbuffer) <<= size;
+    //total number of bits to be shifted in
+    *pbitcount += size;
+    if (*pbitcount >= 8) { //we need to shift in at least 1 byte
+        *pbitbuffer |= *((uint8_t*) (*pbitstream)) << (*pbitcount - 8);
+
+        *pbitstream = ((uint8_t*) *pbitstream) + 1;
+
+        if (*pbitcount >= 16) { //at least 2 bytes
+            *pbitbuffer |= *((uint8_t*) (*pbitstream)) << (*pbitcount - 16);
+
+            *pbitstream = ((uint8_t*) *pbitstream) + 1;
+
+            if (*pbitcount >= 24) { //at least 3 bytes
+                *pbitbuffer |= *((uint8_t*) (*pbitstream)) << (*pbitcount - 24);
+
+                *pbitstream = ((uint8_t*) *pbitstream) + 1;
+
+                if (*pbitcount == 32) { //all 4 bytes shifted in
+                    *pbitbuffer |= *((uint8_t*) (*pbitstream));
+
+                    *pbitstream = ((uint8_t*) *pbitstream) + 1;
+
+                }
+
+            }
+
+        }
+
+    }
+    *pbitcount &= 7; //the resulting *pbitcount should be between 0 and 7
+}
+
 // -----------------------------------------------------------
 //VLI decoding.
 //x is encoded amplitude (two's complement), s is size.

@@ -21,16 +21,6 @@
 #include <string.h>
 #include <sys/alt_cache.h>
 
-#define MAX_IFRAME_OFFSET (24)
-
-#define NUM_H_BLOCKS (DISPLAY_HEIGHT / 8)
-#define NUM_W_BLOCKS (DISPLAY_WIDTH / 8)
-#define YBISTREAM_BYTES (NUM_H_BLOCKS * NUM_W_BLOCKS * 64 * sizeof(DCTELEM) + \
-    		2 * NUM_H_BLOCKS * NUM_W_BLOCKS * 64 * sizeof(DCTELEM))
-#define NUM_Y_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-#define NUM_CB_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-#define NUM_CR_DCT_BLOCKS (NUM_H_BLOCKS * NUM_W_BLOCKS)
-
 typedef struct PLAYBACK_DATA_STRUCT{
 	bool playing;
 	uint32_t volatile currentFrame; // 0 index frames
@@ -54,7 +44,7 @@ static void timerFunction (void) {
 		playbackData.currentFrame++;
 	}
 	else {
-		assert(false, "failed\n");
+		assert_persistent(false, "failed\n");
 	}
 }
 
@@ -65,6 +55,8 @@ static inline void ld_idct_cr_cb (mailbox_msg_t volatile * msg) {
 	uint8_t volatile * ptr;
 
 	ptr = playbackData.mpegFrameBuffer.Ybitstream + msg->type_data.done_read_next_frame.cbOffset;
+	alt_dcache_flush_no_writeback(ptr, YBISTREAM_BYTES - msg->type_data.done_read_next_frame.cbOffset);
+
 	lossless_decode(NUM_CB_DCT_BLOCKS, ptr, playbackData.mpegFrameBuffer.CbDCAC,
 			Cquant, msg->type_data.done_read_next_frame.frameType);
 
@@ -73,6 +65,9 @@ static inline void ld_idct_cr_cb (mailbox_msg_t volatile * msg) {
 			Cquant, msg->type_data.done_read_next_frame.frameType);
 
 	DBG_PRINT("LD for CB and CR done\n");
+
+	alt_dcache_flush(playbackData.mpegFrameBuffer.CbDCAC, NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
+	alt_dcache_flush(playbackData.mpegFrameBuffer.CrDCAC, NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 
 	idct_accel_calculate_buffer_cb(playbackData.mpegFrameBuffer.CbDCAC,
 			NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
@@ -83,28 +78,7 @@ static inline void ld_idct_cr_cb (mailbox_msg_t volatile * msg) {
 	DBG_PRINT("IDCT for CB and CR started\n");
 }
 
-static inline void idct_y_ycbcr (mailbox_msg_t volatile * msg, void * outputBuffer) {
-	idct_accel_calculate_buffer_y(playbackData.mpegFrameBuffer.YDCAC,
-			NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
-
-	DBG_PRINT("IDCT for Y started\n");
-
-	ycbcr_to_rgb_accel_get_results(outputBuffer,
-			DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
-
-	DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
-
-	wait_for_ycbcr_to_rgb_finsh();
-
-	DBG_PRINT("Done ycbcr_to_rgb\n");
-
-	ece423_video_display_register_written_buffer(playbackData.display);
-	playbackData.processedFrame++;
-
-	DBG_PRINT("Registered output frame buffer\n");
-}
-
-static inline void process (void * const currentOutputBuffer, bool const firstFrame, bool const sendRequest, bool const noTimer) {
+static inline void process (void * const currentOutputBuffer, bool const sendRequest, bool const noTimer) {
 	mailbox_msg_t volatile * msg;
 
 	DBG_PRINT("Wait for response from slave so we can start LD CB and CR\n");
@@ -112,13 +86,6 @@ static inline void process (void * const currentOutputBuffer, bool const firstFr
 	assert(msg->header.type == DONE_READ_NEXT_FRAME,
 			"Received msg is not DONE_READ_NEXT_FRAME; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start LD CB and CR\n");
-
-	if (firstFrame) {
-		//
-		// Flush cache so that our mpeg header and trailer stuff is updated
-		//
-		alt_dcache_flush_all();
-	}
 
 	ld_idct_cr_cb(msg);
 
@@ -133,17 +100,37 @@ static inline void process (void * const currentOutputBuffer, bool const firstFr
 			"Received msg is not DONE_LD_Y; %d\n", msg->header.type);
 	DBG_PRINT("Got response from slave so we can start IDCT Y\n");
 
-	idct_y_ycbcr(msg, currentOutputBuffer);
+	idct_accel_calculate_buffer_y(playbackData.mpegFrameBuffer.YDCAC,
+			NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
+
+	DBG_PRINT("IDCT for Y started\n");
+
+
+	ycbcr_to_rgb_accel_get_results(currentOutputBuffer,
+			DISPLAY_HEIGHT * DISPLAY_WIDTH * sizeof(rgb_pixel_t));
+
+	DBG_PRINT("Wait for ycbcr_to_rgb to finish\n");
+
+	if (sendRequest) {
+		wait_for_idct_y_finsh();
+
+		send_ok_to_ld_y(&playbackData.mpegHeader,
+				playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
+		DBG_PRINT("OK_TO_LD_Y msg sent\n");
+	}
+
+	wait_for_ycbcr_to_rgb_finsh();
+
+	DBG_PRINT("Done ycbcr_to_rgb\n");
+
+	ece423_video_display_register_written_buffer(playbackData.display);
+	playbackData.processedFrame++;
+
+	DBG_PRINT("Registered output frame buffer\n");
 
 	if (noTimer) {
 		ece423_video_display_switch_frames(playbackData.display);
 		playbackData.currentFrame++;
-	}
-
-	if (sendRequest) {
-		send_ok_to_ld_y(&playbackData.mpegHeader,
-				playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
-		DBG_PRINT("OK_TO_LD_Y msg sent\n");
 	}
 }
 
@@ -163,7 +150,7 @@ static void seekFrame (uint32_t frameIndex, uint32_t framePosition) {
 	send_seek_video (&playbackData.mpegHeader, playbackData.mpegFrameBuffer.Ybitstream,
 			playbackData.mpegFrameBuffer.YDCAC, framePosition);
 
-	process(currentOutputBuffer, 0, 0, 1);
+	process(currentOutputBuffer, 0, 1);
 
 	DBG_PRINT("Done load video\n");
 }
@@ -243,6 +230,8 @@ void rewindVideo (void) {
 void loadVideo (void) {
 	uint32_t* currentOutputBuffer;
 
+	alt_dcache_flush_all();
+
 	playbackData.playing = false;
 	playbackData.currentFrame = 0;
 	playbackData.processedFrame = 0;
@@ -254,7 +243,7 @@ void loadVideo (void) {
 	send_read_next_file (&playbackData.mpegHeader, &playbackData.mpegTrailer,
 			playbackData.mpegFrameBuffer.Ybitstream, playbackData.mpegFrameBuffer.YDCAC);
 
-	process(currentOutputBuffer, 1, 0, 1);
+	process(currentOutputBuffer, 0, 1);
 
 	DBG_PRINT("Done load video\n");
 }
@@ -287,7 +276,7 @@ void playVideo (int (*functionToStopPlayingFrames)(void)) {
 		flag = ((playbackData.processedFrame < (playbackData.mpegHeader.num_frames - 1))
 				&& (functionToStopPlayingFrames() == 0));
 
-		process(currentOutputBuffer, 0, flag, !FORCE_PERIODIC);
+		process(currentOutputBuffer, flag, !FORCE_PERIODIC);
 
 		if (flag) {
 			while (ece423_video_display_buffer_is_available(playbackData.display) != 0){}
@@ -333,28 +322,28 @@ void closeVideo (void) {
 int initPlayback (ece423_video_display* display) {
 	playbackData.display = display;
 
-	playbackData.mpegFrameBuffer.Ybitstream = (uint8_t volatile *) alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.Ybitstream = (uint8_t volatile *) malloc(
 			YBISTREAM_BYTES);
 	if (!playbackData.mpegFrameBuffer.Ybitstream) {
 		DBG_PRINT("Ybistream malloc failed!\n");
 		return 0;
 	}
 
-	playbackData.mpegFrameBuffer.YDCAC = (dct_block_t volatile *) alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.YDCAC = (dct_block_t volatile *) malloc(
 			NUM_Y_DCT_BLOCKS * sizeof(dct_block_t));
 	if (!playbackData.mpegFrameBuffer.YDCAC) {
 		DBG_PRINT("YDCAC malloc failed!\n");
 		return 0;
 	}
 
-	playbackData.mpegFrameBuffer.CbDCAC = (dct_block_t volatile *) alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.CbDCAC = (dct_block_t volatile *) malloc(
 			NUM_CB_DCT_BLOCKS * sizeof(dct_block_t));
 	if (!playbackData.mpegFrameBuffer.CbDCAC) {
 		DBG_PRINT("CbDCAC malloc failed!\n");
 		return 0;
 	}
 
-	playbackData.mpegFrameBuffer.CrDCAC = (dct_block_t volatile *) alt_uncached_malloc(
+	playbackData.mpegFrameBuffer.CrDCAC = (dct_block_t volatile *) malloc(
 			NUM_CR_DCT_BLOCKS * sizeof(dct_block_t));
 	if (!playbackData.mpegFrameBuffer.CrDCAC) {
 		DBG_PRINT("CrDCAC malloc failed!\n");

@@ -236,8 +236,6 @@ static void doWork (void) {
 		msg = recv_msg();
 		DBG_PRINT("Got msg type: %d\n", msg->header.type);
 
-		alt_dcache_flush_all();
-
 		switch(msg->header.type) {
 			case READ_NEXT_FILE:
 				DBG_PRINT("READ_NEXT_FILE msg received\n");

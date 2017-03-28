@@ -42,6 +42,8 @@ static void timerFunction (void) {
 	retVal = ece423_video_display_switch_frames(playbackData.display);
 	if (retVal != -1) {
 		playbackData.currentFrame++;
+	} else {
+		printf("m");
 	}
 }
 

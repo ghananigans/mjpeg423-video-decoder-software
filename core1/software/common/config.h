@@ -24,7 +24,7 @@
 #define DISPLAY_HEIGHT		(480)
 
 // The number of buffers to initialize the display with
-#define NUM_OUTPUT_BUFFERS	(5)
+#define NUM_OUTPUT_BUFFERS	(6)
 
 #define FRAME_RATE_MS 		(40)
 

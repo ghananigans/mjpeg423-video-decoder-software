@@ -24,6 +24,7 @@
 #include "common/mailbox/mailbox.h"
 #include "playback.h"
 #include <stdbool.h>
+#include "profile.h"
 
 #define PLAY_PAUSE_VIDEO_BUTTON		(1)
 #define LOAD_NEXT_VIDEO_BUTTON		(2)
@@ -108,7 +109,19 @@ static void doWork (void) {
 			}
 
 			DBG_PRINT("Playing video\n");
+
+#ifdef TIMING_TEST_VIDEO_TIMING
+			initProfile();
+			PROFILE_TIME_START(TIMING_TEST_VIDEO_TIMING, 0);
+#endif // #ifdef TIMING_TEST_VIDEO_TIMING
+
 			playVideo(&buttonHasBeenPressed); // Can stop because video ended OR
+
+#ifdef TIMING_TEST_VIDEO_TIMING
+			PROFILE_TIME_END(TIMING_TEST_VIDEO_TIMING, 0);
+			PROFILE_TIME_PRINT(TIMING_TEST_VIDEO_TIMING, 0);
+#endif // #ifdef TIMING_TEST_VIDEO_TIMING
+
 			//playVideo(&test);
 			DBG_PRINT("Video stopped\n");
 		}

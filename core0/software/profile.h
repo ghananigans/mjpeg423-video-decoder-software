@@ -13,7 +13,7 @@
 #include <stdint.h>
 #include "common/utils.h"
 
-#define NUM_TIMING_TESTS							(10)
+#define NUM_TIMING_TESTS							(2)
 #define NUM_SIZE_TESTS								(4)
 
 extern uint16_t profile_time_flag;
@@ -31,15 +31,7 @@ extern uint64_t profile_size_min[NUM_SIZE_TESTS][2];
 
 #ifdef TIMING_TESTS
 #define TIMING_TEST_EMPTY							(0)
-//#define TIMING_TEST_SD_READ							(1)
-//#define TIMING_TEST_LOSSLESS_Y						(2)
-//#define TIMING_TEST_LOSSLESS_CB						(3)
-//#define TIMING_TEST_LOSSLESS_CR						(4)
-//#define TIMING_TEST_IDCT_ONE_FRAME					(5)
-//#define TIMING_TEST_IDCT_ONE_COLOUR_COMPONENT		(6)
-#define TIMING_TEST_IDCT_ONE_8_X_8_BLOCK			(7)
-//#define TIMING_TEST_YCBCR_TO_RGB_ONE_FRAME			(8)
-#define TIMING_TEST_YCBCR_TO_RGB_8_X_8_BLOCK		(9)
+#define TIMING_TEST_VIDEO_TIMING					(1)
 #endif // #ifdef TIMING_TESTS
 
 #ifdef SIZE_TESTS
